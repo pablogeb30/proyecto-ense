@@ -7,10 +7,12 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import usc.etse.grei.ense.p3.project.handler.ResponseHandler;
 import usc.etse.grei.ense.p3.project.model.OnCreate;
 import usc.etse.grei.ense.p3.project.model.OnUpdate;
 import usc.etse.grei.ense.p3.project.model.User;
@@ -35,8 +37,9 @@ public class UserController {
 		this.users = users;
 	}
 
-	private EntityModel<User> getEntityModel(User user) {
+	private EntityModel<User> getEntityModel() {
 
+		User user = new User();
 		EntityModel<User> entityModel = EntityModel.of(user);
 
 		entityModel.add(linkTo(methodOn(UserController.class).getUser("email@email.com")).withSelfRel());
@@ -47,7 +50,7 @@ public class UserController {
 	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Page<User>> getUsers(
+	ResponseEntity<Object> getUsers(
 			@RequestParam(name = "page", required = false, defaultValue = "0") int page,
 			@RequestParam(name = "size", required = false, defaultValue = "20") int size,
 			@RequestParam(name = "sort", required = false, defaultValue = "") List<String> sort,
@@ -66,7 +69,14 @@ public class UserController {
 				matcher
 		);
 
-		return ResponseEntity.of(users.get(page, size, Sort.by(criteria), filter));
+		Optional<Page<User>> dbUsers = users.get(page, size, Sort.by(criteria), filter);
+		List<User> userList = dbUsers.get().getContent();
+
+		if (dbUsers.isPresent()) {
+			return ResponseHandler.generateResponse(false, "ok", 0, userList, getEntityModel(), HttpStatus.ACCEPTED);
+		} else {
+			return ResponseHandler.generateResponse(true, "ok", 0, userList, getEntityModel(), HttpStatus.NOT_FOUND);
+		}
 
 	}
 
@@ -77,7 +87,7 @@ public class UserController {
 
 		if (user.isPresent()) {
 
-			return ResponseEntity.ok(getEntityModel(user.get()));
+			return ResponseEntity.ok(getEntityModel());
 
 		} else {
 
@@ -111,7 +121,7 @@ public class UserController {
 
 		if (user.isPresent()) {
 
-			return ResponseEntity.ok(getEntityModel(user.get()));
+			return ResponseEntity.ok(getEntityModel());
 
 		} else {
 
@@ -145,7 +155,7 @@ public class UserController {
 
 		if (result.isPresent()) {
 
-			return ResponseEntity.ok(getEntityModel(result.get()));
+			return ResponseEntity.ok(getEntityModel());
 
 		} else {
 

@@ -1,6 +1,8 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,7 +16,11 @@ public class Movie {
 
 	@Id
 	private String id;
+
+	@NotBlank(message = "The name field can not be empty", groups = OnCreate.class)
+	@Size(min = 2, max = 256)
 	private String title;
+
 	private String overview;
 	private String tagline;
 	private Collection collection;

@@ -1,6 +1,7 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
@@ -10,14 +11,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@Document(collection = "films")
+@Document(collection = "movies")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Movie {
 
 	@Id
+	@NotBlank(message = "The title field can not be empty", groups = OnRelation.class)
 	private String id;
 
-	@NotBlank(message = "The name field can not be empty", groups = OnCreate.class)
+	@NotBlank(message = "The title field can not be empty", groups = OnCreate.class)
+	@NotBlank(message = "The title field can not be empty", groups = OnRelation.class)
 	@Size(min = 2, max = 256)
 	private String title;
 
@@ -25,7 +28,10 @@ public class Movie {
 	private String tagline;
 	private Collection collection;
 	private List<String> genres;
+
+	@Valid
 	private Date releaseDate;
+
 	private List<String> keywords;
 	private List<Producer> producers;
 	private List<Crew> crew;
@@ -236,4 +242,5 @@ public class Movie {
 				.add("revenue=" + revenue)
 				.toString();
 	}
+
 }

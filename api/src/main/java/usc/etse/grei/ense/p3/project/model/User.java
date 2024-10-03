@@ -18,24 +18,22 @@ import java.util.StringJoiner;
 public class User {
 
 	@Id
-	@NotBlank(message = "The email field can not be empty", groups = OnCreate.class)
-	@NotBlank(message = "The email field can not be empty", groups = OnUpdate.class)
+	@NotBlank(message = "The email field can not be empty", groups = {OnCreate.class, OnRelation.class})
 	@Email
 	private String email;
 
-	@NotBlank(message = "The name field can not be empty", groups = OnCreate.class)
-	@NotBlank(message = "The name field can not be empty", groups = OnUpdate.class)
+	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class})
 	@Size(min = 2, max = 256)
 	private String name;
 
 	private String country;
 	private String picture;
 
-	@NotNull(message = "The birthday field is required", groups = OnCreate.class)
 	@Valid
+	@NotNull(message = "The birthday field is required", groups = OnCreate.class)
 	private Date birthday;
 
-	private List<User> friends;
+	private List<@Valid User> friends;
 
 	public User() {
 	}
@@ -127,4 +125,5 @@ public class User {
 				.add("friends=" + friends)
 				.toString();
 	}
+
 }

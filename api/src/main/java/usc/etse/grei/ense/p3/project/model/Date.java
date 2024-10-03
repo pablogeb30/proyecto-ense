@@ -10,15 +10,15 @@ import java.util.StringJoiner;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Date {
 
-	@NotNull(message = "The day field can not be empty")
+	@NotNull(message = "The day field can not be empty", groups = OnCreate.class)
 	@Range(min = 1, max = 31, message = "The day field must be between 1 and 31")
 	private Integer day;
 
-	@NotNull(message = "The month field can not be empty")
+	@NotNull(message = "The month field can not be empty", groups = OnCreate.class)
 	@Range(min = 1, max = 12, message = "The month field must be between 1 and 12")
 	private Integer month;
 
-	@NotNull(message = "The year field can not be empty")
+	@NotNull(message = "The year field can not be empty", groups = OnCreate.class)
 	@Range(min = 1900, max = 2024, message = "The year field must be between 1900 and 2100")
 	private Integer year;
 
@@ -80,4 +80,5 @@ public class Date {
 				.add("year=" + year)
 				.toString();
 	}
+
 }

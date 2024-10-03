@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Crew extends Person {
+
 	private String job;
 
 	public Crew() {
@@ -40,4 +41,5 @@ public class Crew extends Person {
 				.add("job='" + job + "'")
 				.toString();
 	}
+
 }

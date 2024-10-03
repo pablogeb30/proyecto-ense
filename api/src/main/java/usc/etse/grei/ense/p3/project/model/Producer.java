@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Producer {
+
 	private String name;
 	private String logo;
 	private String country;
@@ -68,4 +69,5 @@ public class Producer {
 				.add("country='" + country + "'")
 				.toString();
 	}
+
 }

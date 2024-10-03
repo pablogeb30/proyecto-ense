@@ -6,7 +6,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import usc.etse.grei.ense.p3.project.model.Assessment;
 import usc.etse.grei.ense.p3.project.model.User;
+import usc.etse.grei.ense.p3.project.repository.AssessmentRepository;
 import usc.etse.grei.ense.p3.project.repository.UserRepository;
 import usc.etse.grei.ense.p3.project.util.PatchUtil;
 
@@ -21,12 +23,14 @@ public class UserService {
 	private final UserRepository users;
 	private final MongoTemplate mongo;
 	private final PatchUtil patchUtil;
+	private final AssessmentRepository assessments;
 
 	@Autowired
-	public UserService(UserRepository users, MongoTemplate mongo, PatchUtil patchUtil) {
+	public UserService(UserRepository users, MongoTemplate mongo, PatchUtil patchUtil, AssessmentRepository assessments) {
 		this.users = users;
 		this.mongo = mongo;
 		this.patchUtil = patchUtil;
+		this.assessments = assessments;
 	}
 
 	public Optional<Page<User>> get(int page, int size, Sort sort, Example<User> filter) {
@@ -66,18 +70,33 @@ public class UserService {
 
 	public Optional<User> update(String email, List<Map<String, Object>> operations) {
 
-		Optional<User> user = users.findById(email);
-
-		if (!user.isPresent()) {
-			return Optional.empty();
-		}
-
 		try {
 
-			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday")));
+			Optional<User> result = users.findById(email);
 
-			User filteredUser = patchUtil.patch(user.get(), operations);
+			if (result.isEmpty()) {
+				return Optional.empty();
+			}
+
+			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday") || op.get("path").equals("/friends")));
+
+			User originalUser = result.get();
+			User filteredUser = patchUtil.patch(result.get(), operations);
 			User updatedUser = users.save(filteredUser);
+
+			ExampleMatcher matcher = ExampleMatcher.matching();
+			Example<Assessment> filter = Example.of(
+					new Assessment().setUser(new User().setEmail(updatedUser.getEmail())),
+					matcher
+			);
+
+			if (!originalUser.getName().equals(updatedUser.getName())) {
+				assessments.findAll(filter).forEach(assessment -> {
+					assessment.getUser().setName(updatedUser.getName());
+					assessments.save(assessment);
+				});
+			}
+
 			return Optional.of(updatedUser);
 
 		} catch (Exception e) {
@@ -89,22 +108,36 @@ public class UserService {
 	}
 
 	public Optional<User> delete(String email) {
-		User user = users.findById(email).orElse(null);
 
-		if (user == null) {
+		Optional<User> result = users.findById(email);
+
+		if (result.isEmpty()) {
 			return Optional.empty();
 		}
 
+		User user = result.get();
+
+		ExampleMatcher matcher = ExampleMatcher.matching();
+		Example<Assessment> filter = Example.of(
+				new Assessment().setUser(new User().setEmail(user.getEmail())),
+				matcher
+		);
+
+		assessments.findAll(filter).forEach(assessment -> {
+			assessments.delete(assessment);
+		});
+
 		users.delete(user);
+
 		return Optional.of(user);
 
 	}
 
 	public Optional<User> addFriend(String email, User friend) {
 
-		User user = users.findById(email).orElse(null);
+		Optional<User> result = users.findById(email);
 
-		if (user == null) {
+		if (result.isEmpty()) {
 			return Optional.empty();
 		}
 
@@ -113,6 +146,8 @@ public class UserService {
 		if (bdFriend == null || !friend.getName().equals(bdFriend.getName())) {
 			return Optional.empty();
 		}
+
+		User user = result.get();
 
 		List<User> friends = user.getFriends();
 
@@ -130,23 +165,28 @@ public class UserService {
 
 	public Optional<User> deleteFriend(String email, String friendEmail) {
 
-		User user = users.findById(email).orElse(null);
+		Optional<User> resultUser = users.findById(email);
 
-		if (user == null) {
+		if (resultUser.isEmpty()) {
 			return Optional.empty();
 		}
 
-		User friend = users.findById(friendEmail).orElse(null);
+		Optional<User> resultFriend = users.findById(friendEmail);
 
-		if (friend == null) {
+		if (resultFriend.isEmpty()) {
 			return Optional.empty();
 		}
+
+		User user = resultFriend.get();
+		User friend = resultFriend.get();
 
 		if (friend.getFriends() == null) {
 			return Optional.empty();
 		}
 
 		user.getFriends().remove(friend);
+
+		users.save(user);
 
 		return Optional.of(user);
 

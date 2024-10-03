@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Resource {
+
 	private String url;
 	private ResourceType type;
 
@@ -56,4 +57,5 @@ public class Resource {
 				.add("type=" + type)
 				.toString();
 	}
+
 }

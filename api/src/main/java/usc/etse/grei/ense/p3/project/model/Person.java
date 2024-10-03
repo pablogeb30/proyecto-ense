@@ -1,22 +1,29 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.Valid;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@Document(collection = "people")
+@Document(collection = "persons")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Person {
+
 	@Id
 	private String id;
+
 	private String name;
 	private String country;
 	private String picture;
 	private String biography;
+
+	@Valid
 	private Date birthday;
+
+	@Valid
 	private Date deathday;
 
 	public Person() {
@@ -120,4 +127,5 @@ public class Person {
 				.add("deathday=" + deathday)
 				.toString();
 	}
+
 }

@@ -1,20 +1,36 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@Document(collection = "comments")
+@Document(collection = "assessments")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Assessment {
+
 	@Id
+	@Null(message = "The rating field need to be null", groups = {OnUserCreate.class, OnMovieCreate.class})
 	private String id;
+
+	@NotNull(message = "The rating field can not be empty", groups = {OnUserCreate.class, OnMovieCreate.class})
+	@Range(min = 1, max = 10)
 	private Integer rating;
+
+	@Valid
+	@NotNull(message = "The user field can not be empty", groups = OnMovieCreate.class)
 	private User user;
+
+	@Valid
+	@NotNull(message = "The movie field can not be empty", groups = OnUserCreate.class)
 	private Movie movie;
+
 	private String comment;
 
 	public Assessment() {
@@ -96,4 +112,5 @@ public class Assessment {
 				.add("comment='" + comment + "'")
 				.toString();
 	}
+
 }

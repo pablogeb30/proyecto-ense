@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Cast extends Person {
+
 	private String character;
 
 	public Cast() {
@@ -45,4 +46,5 @@ public class Cast extends Person {
 				.add("character='" + character + "'")
 				.toString();
 	}
+
 }

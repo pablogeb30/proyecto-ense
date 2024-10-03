@@ -6,7 +6,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import usc.etse.grei.ense.p3.project.model.Assessment;
 import usc.etse.grei.ense.p3.project.model.Movie;
+import usc.etse.grei.ense.p3.project.repository.AssessmentRepository;
 import usc.etse.grei.ense.p3.project.repository.MovieRepository;
 import usc.etse.grei.ense.p3.project.util.PatchUtil;
 
@@ -20,12 +22,14 @@ public class MovieService {
 	private final MovieRepository movies;
 	private final MongoTemplate mongo;
 	private final PatchUtil patchUtil;
+	private final AssessmentRepository assessments;
 
 	@Autowired
-	public MovieService(MovieRepository movies, MongoTemplate mongo, PatchUtil patchUtil) {
+	public MovieService(MovieRepository movies, MongoTemplate mongo, PatchUtil patchUtil, AssessmentRepository assessments) {
 		this.movies = movies;
 		this.mongo = mongo;
 		this.patchUtil = patchUtil;
+		this.assessments = assessments;
 	}
 
 	public Optional<Page<Movie>> get(int page, int size, Sort sort, Example<Movie> filter) {
@@ -64,16 +68,32 @@ public class MovieService {
 
 	public Optional<Movie> update(String id, List<Map<String, Object>> operations) {
 
-		Optional<Movie> movie = movies.findById(id);
-
-		if (!movie.isPresent()) {
-			return Optional.empty();
-		}
-
 		try {
 
-			Movie filteredMovie = patchUtil.patch(movie.get(), operations);
+			Optional<Movie> movie = movies.findById(id);
+
+			if (!movie.isPresent()) {
+				return Optional.empty();
+			}
+
+			Movie originalMovie = movie.get();
+			Movie filteredMovie = patchUtil.patch(originalMovie, operations);
 			Movie updatedMovie = movies.save(filteredMovie);
+
+			ExampleMatcher matcher = ExampleMatcher.matching();
+			Example<Assessment> filter = Example.of(
+					new Assessment().setMovie(new Movie().setId(updatedMovie.getId())),
+					matcher
+			);
+
+			if (!originalMovie.getTitle().equals(updatedMovie.getTitle()) || !originalMovie.getId().equals(updatedMovie.getId())) {
+				assessments.findAll(filter).forEach(assessment -> {
+					assessment.getMovie().setTitle(updatedMovie.getTitle());
+					assessment.getMovie().setId(updatedMovie.getId());
+					assessments.save(assessment);
+				});
+			}
+
 			return Optional.of(updatedMovie);
 
 		} catch (Exception e) {
@@ -86,13 +106,26 @@ public class MovieService {
 
 	public Optional<Movie> delete(String id) {
 
-		Movie movie = movies.findById(id).orElse(null);
+		Optional<Movie> result = movies.findById(id);
 
-		if (movie == null) {
+		if (result.isEmpty()) {
 			return Optional.empty();
 		}
 
+		Movie movie = result.get();
+
+		ExampleMatcher matcher = ExampleMatcher.matching();
+		Example<Assessment> filter = Example.of(
+				new Assessment().setMovie(new Movie().setId(movie.getId())),
+				matcher
+		);
+
+		assessments.findAll(filter).forEach(assessment -> {
+			assessments.delete(assessment);
+		});
+
 		movies.delete(movie);
+
 		return Optional.of(movie);
 
 	}

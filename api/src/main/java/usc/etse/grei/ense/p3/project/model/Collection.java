@@ -2,15 +2,16 @@ package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Collection {
+
 	private String name;
-	private List<Resource> resources = new ArrayList<>();
+
+	private List<Resource> resources;
 
 	public Collection() {
 	}
@@ -58,4 +59,5 @@ public class Collection {
 				.add("resources=" + resources)
 				.toString();
 	}
+
 }

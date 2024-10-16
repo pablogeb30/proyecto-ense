@@ -45,7 +45,7 @@ public class UserController {
 		EntityModel<User> entityModel = EntityModel.of(user);
 
 		entityModel.add(linkTo(methodOn(UserController.class).getUser("email@email.com")).withSelfRel());
-		entityModel.add(linkTo(methodOn(UserController.class).getUsers(0, 0, null, null)).withRel("users"));
+		entityModel.add(linkTo(methodOn(UserController.class).getUsers(0, 0, null, "", "")).withRel("users"));
 
 		return entityModel;
 
@@ -56,7 +56,8 @@ public class UserController {
 			@RequestParam(name = "page", required = false, defaultValue = "0") int page,
 			@RequestParam(name = "size", required = false, defaultValue = "20") int size,
 			@RequestParam(name = "sort", required = false, defaultValue = "") List<String> sort,
-			@RequestParam(name = "search", required = false, defaultValue = "") String search
+			@RequestParam(name = "email", required = false, defaultValue = "") String email,
+			@RequestParam(name = "name", required = false, defaultValue = "") String name
 	) {
 
 		List<Sort.Order> criteria = SortUtil.getCriteria(sort);
@@ -67,7 +68,7 @@ public class UserController {
 				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
 		Example<User> filter = Example.of(
-				new User().setEmail(search).setName(search),
+				new User().setEmail(email).setName(name),
 				matcher
 		);
 

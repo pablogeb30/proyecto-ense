@@ -1,6 +1,5 @@
 package usc.etse.grei.ense.p3.project.controller;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -14,13 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import usc.etse.grei.ense.p3.project.handler.ResponseHandler;
-import usc.etse.grei.ense.p3.project.model.Assessment;
-import usc.etse.grei.ense.p3.project.model.Movie;
-import usc.etse.grei.ense.p3.project.model.OnMovieCreate;
+import usc.etse.grei.ense.p3.project.model.*;
 import usc.etse.grei.ense.p3.project.service.AssessmentService;
 import usc.etse.grei.ense.p3.project.service.MovieService;
 import usc.etse.grei.ense.p3.project.util.SortUtil;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,10 +48,13 @@ public class MovieController {
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> getMovies(
-			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(name = "size", defaultValue = "20") int size,
-			@RequestParam(name = "sort", defaultValue = "") List<String> sort,
-			@RequestParam(name = "search", required = false, defaultValue = "") String search
+			@RequestParam(name = "page", required = false, defaultValue = "0") int page,
+			@RequestParam(name = "size", required = false, defaultValue = "20") int size,
+			@RequestParam(name = "sort", required = false, defaultValue = "") List<String> sort,
+			@RequestParam(name = "keywords", required = false, defaultValue = "") List<String> keywords,
+			@RequestParam(name = "genres", required = false, defaultValue = "") List<String> genres,
+			@RequestParam(name = "releaseDate", required = false, defaultValue = "") String releaseDate,
+			@RequestParam(name = "cast", required = false, defaultValue = "") List<String> cast
 	) {
 
 		List<Sort.Order> criteria = SortUtil.getCriteria(sort);
@@ -60,19 +62,62 @@ public class MovieController {
 		ExampleMatcher matcher = ExampleMatcher
 				.matchingAny()
 				.withIgnoreCase()
-				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
+				.withMatcher("keywords", ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING))
+				.withMatcher("genres", ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING))
+				.withMatcher("cast", ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING));
+
+		Date parsedDate = null;
+
+		if (!releaseDate.isBlank()) {
+
+			try {
+
+				LocalDate date = LocalDate.parse(releaseDate);
+
+				parsedDate = new Date(date.getDayOfMonth(), date.getMonthValue(), date.getYear());
+
+			} catch (Exception e) {
+
+				return ResponseHandler.generateResponse(true, e.getMessage(), 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
+
+			}
+
+		}
+
+		List<Cast> parsedCast = null;
+
+		if (!cast.isEmpty()) {
+
+			parsedCast = new ArrayList<>();
+
+			for (String castName : cast) {
+
+				Cast castCast = new Cast();
+				castCast.setName(castName);
+				parsedCast.add(castCast);
+
+			}
+
+		}
 
 		Example<Movie> filter = Example.of(
-				new Movie().setTitle(search),
+				new Movie().setReleaseDate(parsedDate).setKeywords(keywords).setGenres(genres).setCast(parsedCast),
 				matcher
 		);
 
 		Optional<Page<Movie>> dbMovies = movies.get(page, size, Sort.by(criteria), filter);
 
 		if (dbMovies.isPresent()) {
-			return ResponseHandler.generateResponse(false, "ok", 0, dbMovies.get().getContent(), getEntityModel(), HttpStatus.OK);
+
+			List<Movie> movieList = dbMovies.get().getContent();
+
+			return ResponseHandler.generateResponse(false, "ok", 0, movieList, getEntityModel(), HttpStatus.OK);
+
 		} else {
+
 			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
+
 		}
 
 	}
@@ -91,7 +136,7 @@ public class MovieController {
 	}
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> createMovie(@Valid @RequestBody Movie movie) {
+	ResponseEntity<Object> createMovie(@Validated(OnCreate.class) @RequestBody Movie movie) {
 
 		Optional<Movie> result = movies.create(movie);
 

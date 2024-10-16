@@ -19,8 +19,7 @@ public class Movie {
 	@NotBlank(message = "The title field can not be empty", groups = OnRelation.class)
 	private String id;
 
-	@NotBlank(message = "The title field can not be empty", groups = OnCreate.class)
-	@NotBlank(message = "The title field can not be empty", groups = OnRelation.class)
+	@NotBlank(message = "The title field can not be empty", groups = {OnCreate.class, OnRelation.class})
 	@Size(min = 2, max = 256)
 	private String title;
 
@@ -33,9 +32,9 @@ public class Movie {
 	private Date releaseDate;
 
 	private List<String> keywords;
-	private List<Producer> producers;
-	private List<Crew> crew;
-	private List<Cast> cast;
+	private List<@Valid Producer> producers;
+	private List<@Valid Crew> crew;
+	private List<@Valid Cast> cast;
 	private List<Resource> resources;
 	private Long budget;
 	private Status status;

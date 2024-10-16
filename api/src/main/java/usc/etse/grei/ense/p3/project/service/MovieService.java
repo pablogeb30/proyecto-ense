@@ -39,7 +39,7 @@ public class MovieService {
 		Criteria criteria = Criteria.byExample(filter);
 
 		Query query = Query.query(criteria).with(request);
-		query.fields().include("title", "overview", "genres", "releaseDate", "resources");
+		query.fields().exclude("_id");
 
 		List<Movie> result = mongo.find(query, Movie.class);
 

@@ -127,6 +127,12 @@ public class UserService {
 			assessments.delete(assessment);
 		});
 
+		if (user.getFriends() != null) {
+			for (User friend : user.getFriends()) {
+				deleteFriend(user.getEmail(), friend.getEmail());
+			}
+		}
+
 		users.delete(user);
 
 		return Optional.of(user);
@@ -159,6 +165,10 @@ public class UserService {
 
 		user.setFriends(friends);
 
+		users.save(user);
+
+		addFriend(bdFriend.getEmail(), user);
+
 		return Optional.of(user);
 
 	}
@@ -180,13 +190,16 @@ public class UserService {
 		User user = resultFriend.get();
 		User friend = resultFriend.get();
 
-		if (friend.getFriends() == null) {
+		if (user.getFriends() == null) {
 			return Optional.empty();
 		}
 
 		user.getFriends().remove(friend);
+		user.setFriends(user.getFriends());
 
 		users.save(user);
+
+		deleteFriend(friendEmail, email);
 
 		return Optional.of(user);
 

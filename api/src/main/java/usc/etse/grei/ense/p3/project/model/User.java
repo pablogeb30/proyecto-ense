@@ -2,10 +2,8 @@ package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,20 +17,24 @@ public class User {
 
 	@Id
 	@NotBlank(message = "The email field can not be empty", groups = {OnCreate.class, OnRelation.class})
-	@Email
+	@Email(message = "The email field need to be a valid email", groups = {OnCreate.class, OnRelation.class})
 	private String email;
 
-	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class})
-	@Size(min = 2, max = 256)
+	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
 	private String name;
 
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
 	private String country;
+
+	@URL(message = "The picture field need to be a valid URL", groups = {OnCreate.class, OnUpdate.class})
 	private String picture;
 
 	@Valid
 	@NotNull(message = "The birthday field is required", groups = OnCreate.class)
 	private Date birthday;
 
+	@Null(message = "The friends field is not allowed", groups = OnCreate.class)
 	private List<@Valid User> friends;
 
 	public User() {

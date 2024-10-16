@@ -63,7 +63,7 @@ public class UserController {
 		List<Sort.Order> criteria = SortUtil.getCriteria(sort);
 
 		ExampleMatcher matcher = ExampleMatcher
-				.matchingAny()
+				.matchingAll()
 				.withIgnoreCase()
 				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
@@ -72,121 +72,57 @@ public class UserController {
 				matcher
 		);
 
-		Optional<Page<User>> dbUsers = users.get(page, size, Sort.by(criteria), filter);
-
-		if (dbUsers.isPresent()) {
-
-			List<User> userList = dbUsers.get().getContent();
-
-			return ResponseHandler.generateResponse(false, "ok", 0, userList, getEntityModel(), HttpStatus.ACCEPTED);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<List<User>> result = users.get(page, size, Sort.by(criteria), filter);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@GetMapping(path = "{email}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> getUser(@PathVariable("email") @Email String email) {
 
-		Optional<User> user = users.get(email);
-
-		if (user.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, user.get(), getEntityModel(), HttpStatus.ACCEPTED);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<User> result = users.get(email);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> createUser(@Validated(OnCreate.class) @RequestBody User user) {
 
-		Optional<User> result = users.create(user);
-
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result.get(), getEntityModel(), HttpStatus.ACCEPTED);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.CONFLICT);
-
-		}
+		Result<User> result = users.create(user);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@PatchMapping(path = "{email}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> updateUser(@PathVariable("email") @Email String email, @RequestBody List<Map<String, Object>> updates) {
 
-		Optional<User> result = users.update(email, updates);
-
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result.get(), getEntityModel(), HttpStatus.OK);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<User> result = users.update(email, updates);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@DeleteMapping(path = "{email}")
 	ResponseEntity<Object> deleteUser(@PathVariable("email") @Email String email) {
 
-		Optional<User> result = users.delete(email);
-
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result.get(), getEntityModel(), HttpStatus.OK);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<User> result = users.delete(email);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@PostMapping(path = "{email}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> addFriend(@PathVariable("email") @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
 
-		Optional<User> result = users.addFriend(email, friend);
+		Result<User> result = users.addFriend(email, friend, true);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result.get(), getEntityModel(), HttpStatus.OK);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
 
 	}
 
 	@DeleteMapping(path = "{email}/friends/{friendEmail}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> deleteFriend(@PathVariable("email") @Email String email, @PathVariable("friendEmail") @Email String friendEmail) {
 
-		Optional<User> result = users.deleteFriend(email, friendEmail);
-
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result.get(), getEntityModel(), HttpStatus.OK);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<User> result = users.deleteFriend(email, friendEmail, true);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 

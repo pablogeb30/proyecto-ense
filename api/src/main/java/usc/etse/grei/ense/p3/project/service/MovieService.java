@@ -8,14 +8,13 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import usc.etse.grei.ense.p3.project.model.*;
 import usc.etse.grei.ense.p3.project.model.Date;
+import usc.etse.grei.ense.p3.project.model.*;
 import usc.etse.grei.ense.p3.project.repository.AssessmentRepository;
 import usc.etse.grei.ense.p3.project.repository.MovieRepository;
 import usc.etse.grei.ense.p3.project.repository.PersonRepository;
 import usc.etse.grei.ense.p3.project.util.PatchUtil;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,11 +39,51 @@ public class MovieService {
 		this.validator = validator;
 	}
 
-	public Result<List<Movie>> get(int page, int size, Sort sort, Example<Movie> filter) {
+	public Result<List<Movie>> get(int page, int size, Sort sort, Example<Movie> filter, List<Cast> castList, List<Crew> crewList) {
 
 		Pageable request = PageRequest.of(page, size, sort);
 
 		Criteria criteria = Criteria.byExample(filter);
+
+		if (!castList.isEmpty()) {
+
+			List<String> castIds = castList.stream().map(Cast::getId).filter(Objects::nonNull).collect(Collectors.toList());
+			List<String> castNames = castList.stream().map(Cast::getName).filter(Objects::nonNull).collect(Collectors.toList());
+			List<String> castCharacters = castList.stream().map(Cast::getCharacter).filter(Objects::nonNull).collect(Collectors.toList());
+
+			if (!castIds.isEmpty()) {
+				criteria.and("cast.id").in(castIds);
+			}
+
+			if (!castNames.isEmpty()) {
+				criteria.and("cast.name").in(castNames);
+			}
+
+			if (!castCharacters.isEmpty()) {
+				criteria.and("cast.character").in(castCharacters);
+			}
+
+		}
+
+		if (!crewList.isEmpty()) {
+
+			List<String> crewIds = crewList.stream().map(Crew::getId).filter(Objects::nonNull).collect(Collectors.toList());
+			List<String> crewNames = crewList.stream().map(Crew::getName).filter(Objects::nonNull).collect(Collectors.toList());
+			List<String> crewJobs = crewList.stream().map(Crew::getJob).filter(Objects::nonNull).collect(Collectors.toList());
+
+			if (!crewIds.isEmpty()) {
+				criteria.and("crew.id").in(crewIds);
+			}
+
+			if (!crewNames.isEmpty()) {
+				criteria.and("crew.name").in(crewNames);
+			}
+
+			if (!crewJobs.isEmpty()) {
+				criteria.and("crew.job").in(crewJobs);
+			}
+
+		}
 
 		Query query = Query.query(criteria).with(request);
 

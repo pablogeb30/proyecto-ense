@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -22,7 +21,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("movies")
@@ -53,7 +51,8 @@ public class MovieController {
 			@RequestParam(name = "sort", required = false, defaultValue = "") List<String> sort,
 			@RequestParam(name = "keywords", required = false, defaultValue = "") List<String> keywords,
 			@RequestParam(name = "genres", required = false, defaultValue = "") List<String> genres,
-			@RequestParam(name = "releaseDate", required = false, defaultValue = "") String releaseDate
+			@RequestParam(name = "releaseDate", required = false, defaultValue = "") String releaseDate,
+			@RequestParam(name = "cast", required = false, defaultValue = "") List<String> cast
 	) {
 
 		List<Sort.Order> criteria = SortUtil.getCriteria(sort);
@@ -87,7 +86,71 @@ public class MovieController {
 
 			} catch (Exception e) {
 
-				return ResponseHandler.generateResponse(true, e.getMessage(), 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse(true, e.getMessage(), 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+
+			}
+
+		}
+
+		List<Cast> castList = new ArrayList<>();
+
+		if (!cast.isEmpty()) {
+
+			for (String castString : cast) {
+
+				Cast newCast = new Cast();
+
+				String[] parts = castString.split("-", 3);
+
+				if (parts.length != 3) {
+					return ResponseHandler.generateResponse(true, "Invalid cast", 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+				}
+
+				if (!parts[0].equals("*")) {
+					newCast.setId(parts[0]);
+				}
+
+				if (!parts[1].equals("*")) {
+					newCast.setName(parts[1]);
+				}
+
+				if (!parts[2].equals("*")) {
+					newCast.setCharacter(parts[2]);
+				}
+
+				castList.add(newCast);
+
+			}
+
+		}
+
+		List<Crew> crewList = new ArrayList<>();
+
+		if (!cast.isEmpty()) {
+
+			for (String crewString : cast) {
+
+				Crew newCrew = new Crew();
+
+				String[] parts = crewString.split("-", 3);
+
+				if (parts.length != 3) {
+					return ResponseHandler.generateResponse(true, "Invalid crew", 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+				}
+
+				if (!parts[0].equals("*")) {
+					newCrew.setId(parts[0]);
+				}
+
+				if (!parts[1].equals("*")) {
+					newCrew.setName(parts[1]);
+				}
+
+				if (!parts[2].equals("*")) {
+					newCrew.setJob(parts[2]);
+				}
+
+				crewList.add(newCrew);
 
 			}
 
@@ -98,7 +161,7 @@ public class MovieController {
 				matcher
 		);
 
-		Result<List<Movie>> result = movies.get(page, size, Sort.by(criteria), filter);
+		Result<List<Movie>> result = movies.get(page, size, Sort.by(criteria), filter, castList, crewList);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}

@@ -9,8 +9,6 @@ public class Result<T> {
 	private String messaje;
 	private Integer internalCode;
 	private Code externalCode;
-	public Result() {
-	}
 
 	public Result(T result, boolean error, String messaje, Integer internalCode, Code externalCode) {
 		this.result = result;
@@ -36,30 +34,23 @@ public class Result<T> {
 		return internalCode;
 	}
 
+	public Code getExternalCode() {
+		return externalCode;
+	}
+
 	public HttpStatus getStatus() {
 
-		switch (externalCode) {
-			case OK:
-				return HttpStatus.OK;
-			case CREATED:
-				return HttpStatus.CREATED;
-			case ACCEPTED:
-				return HttpStatus.ACCEPTED;
-			case NO_CONTENT:
-				return HttpStatus.NO_CONTENT;
-			case BAD_REQUEST:
-				return HttpStatus.BAD_REQUEST;
-			case UNAUTHORIZED:
-				return HttpStatus.UNAUTHORIZED;
-			case FORBIDDEN:
-				return HttpStatus.FORBIDDEN;
-			case NOT_FOUND:
-				return HttpStatus.NOT_FOUND;
-			case CONFLICT:
-				return HttpStatus.CONFLICT;
-			default:
-				return HttpStatus.BAD_REQUEST;
-		}
+		return switch (externalCode) {
+			case OK -> HttpStatus.OK;
+			case CREATED -> HttpStatus.CREATED;
+			case ACCEPTED -> HttpStatus.ACCEPTED;
+			case NO_CONTENT -> HttpStatus.NO_CONTENT;
+			case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+			case FORBIDDEN -> HttpStatus.FORBIDDEN;
+			case NOT_FOUND -> HttpStatus.NOT_FOUND;
+			case CONFLICT -> HttpStatus.CONFLICT;
+			default -> HttpStatus.BAD_REQUEST;
+		};
 
 	}
 
@@ -79,10 +70,6 @@ public class Result<T> {
 
 		Code(int code) {
 			this.code = code;
-		}
-
-		public int getCode() {
-			return code;
 		}
 
 	}

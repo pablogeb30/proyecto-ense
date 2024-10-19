@@ -16,8 +16,8 @@ import java.util.StringJoiner;
 public class User {
 
 	@Id
-	@NotBlank(message = "The email field can not be empty", groups = {OnCreate.class, OnRelation.class})
-	@Email(message = "The email field need to be a valid email", groups = {OnCreate.class, OnRelation.class})
+	@NotBlank(message = "The email field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Email(message = "The email field need to be a valid email", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	private String email;
 
 	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
@@ -25,16 +25,19 @@ public class User {
 	private String name;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private String country;
 
 	@URL(message = "The picture field need to be a valid URL", groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private String picture;
 
 	@Valid
-	@NotNull(message = "The birthday field is required", groups = OnCreate.class)
+	@NotNull(message = "The birthday field is required", groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private Date birthday;
 
-	@Null(message = "The friends field is not allowed", groups = OnCreate.class)
+	@Null(message = "The friends field is not allowed", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	private List<@Valid User> friends;
 
 	public User() {

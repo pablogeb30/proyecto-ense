@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Crew extends Person {
 
-	@NotBlank(message = "The job field can not be empty", groups = {OnCreate.class, OnRelation.class})
+	@NotBlank(message = "The job field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
 	private String job;
 
 	public Crew() {

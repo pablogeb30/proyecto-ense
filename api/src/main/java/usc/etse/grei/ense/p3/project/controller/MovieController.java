@@ -53,19 +53,25 @@ public class MovieController {
 			@RequestParam(name = "sort", required = false, defaultValue = "") List<String> sort,
 			@RequestParam(name = "keywords", required = false, defaultValue = "") List<String> keywords,
 			@RequestParam(name = "genres", required = false, defaultValue = "") List<String> genres,
-			@RequestParam(name = "releaseDate", required = false, defaultValue = "") String releaseDate,
-			@RequestParam(name = "cast", required = false, defaultValue = "") List<String> cast
+			@RequestParam(name = "releaseDate", required = false, defaultValue = "") String releaseDate
 	) {
 
 		List<Sort.Order> criteria = SortUtil.getCriteria(sort);
 
 		ExampleMatcher matcher = ExampleMatcher
-				.matchingAny()
+				.matchingAll()
 				.withIgnoreCase()
-				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
-				.withMatcher("keywords", ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING))
-				.withMatcher("genres", ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING))
-				.withMatcher("cast", ExampleMatcher.GenericPropertyMatcher.of(ExampleMatcher.StringMatcher.CONTAINING));
+				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+
+		Movie filterMovie = new Movie();
+
+		if (!genres.isEmpty()) {
+			filterMovie.setGenres(genres);
+		}
+
+		if (!keywords.isEmpty()) {
+			filterMovie.setKeywords(keywords);
+		}
 
 		Date parsedDate = null;
 
@@ -77,6 +83,8 @@ public class MovieController {
 
 				parsedDate = new Date(date.getDayOfMonth(), date.getMonthValue(), date.getYear());
 
+				filterMovie.setReleaseDate(parsedDate);
+
 			} catch (Exception e) {
 
 				return ResponseHandler.generateResponse(true, e.getMessage(), 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
@@ -85,104 +93,93 @@ public class MovieController {
 
 		}
 
-		List<Cast> parsedCast = null;
-
-		if (!cast.isEmpty()) {
-
-			parsedCast = new ArrayList<>();
-
-			for (String castName : cast) {
-
-				Cast castCast = new Cast();
-				castCast.setName(castName);
-				parsedCast.add(castCast);
-
-			}
-
-		}
-
 		Example<Movie> filter = Example.of(
-				new Movie().setReleaseDate(parsedDate).setKeywords(keywords).setGenres(genres).setCast(parsedCast),
+				filterMovie,
 				matcher
 		);
 
-		Optional<Page<Movie>> dbMovies = movies.get(page, size, Sort.by(criteria), filter);
-
-		if (dbMovies.isPresent()) {
-
-			List<Movie> movieList = dbMovies.get().getContent();
-
-			return ResponseHandler.generateResponse(false, "ok", 0, movieList, getEntityModel(), HttpStatus.OK);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<List<Movie>> result = movies.get(page, size, Sort.by(criteria), filter);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> getMovie(@PathVariable("id") String id) {
 
-		Optional<Movie> result = movies.get(id);
-
-		if (result.isPresent()) {
-			return ResponseHandler.generateResponse(false, "ok", 0, result.get(), getEntityModel(), HttpStatus.OK);
-		} else {
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-		}
+		Result<Movie> result = movies.get(id);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> createMovie(@Validated(OnCreate.class) @RequestBody Movie movie) {
 
-		Optional<Movie> result = movies.create(movie);
-
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result, getEntityModel(), HttpStatus.CREATED);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, result, getEntityModel(), HttpStatus.CONFLICT);
-
-		}
+		Result<Movie> result = movies.create(movie);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@PatchMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> updateMovie(@PathVariable("id") @NotBlank String id, @RequestBody List<Map<String, Object>> updates) {
 
-		Optional<Movie> result = movies.update(id, updates);
-
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result, getEntityModel(), HttpStatus.OK);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, result, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<Movie> result = movies.update(id, updates);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> deleteMovie(@PathVariable("id") @NotBlank String id) {
 
-		Optional<Movie> result = movies.delete(id);
+		Result<Movie> result = movies.delete(id);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
-		if (result.isPresent()) {
+	}
 
-			return ResponseHandler.generateResponse(false, "ok", 0, null, getEntityModel(), HttpStatus.OK);
+	@PostMapping(path = "{id}/cast", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> addCast(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Cast cast) {
 
-		} else {
+		Result<Cast> result = movies.addCast(id, cast);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
-			return ResponseHandler.generateResponse(true, "error", 0, result, getEntityModel(), HttpStatus.NOT_FOUND);
+	}
 
-		}
+	@PatchMapping(path = "{id}/cast/{castId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> updateCast(@PathVariable("id") @NotBlank String id, @PathVariable("castId") @NotBlank String castId, @RequestBody List<Map<String, Object>> updates) {
+
+		Result<Cast> result = movies.updateCast(id, castId, updates);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+
+	}
+
+	@DeleteMapping(path = "{id}/cast/{castId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> deleteCast(@PathVariable("id") @NotBlank String id, @PathVariable("castId") @NotBlank String castId) {
+
+		Result<Cast> result = movies.deleteCast(id, castId);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+
+	}
+
+	@PostMapping(path = "{id}/crew", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> addCrew(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Crew crew) {
+
+		Result<Crew> result = movies.addCrew(id, crew);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+
+	}
+
+	@PatchMapping(path = "{id}/crew/{crewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> updateCrew(@PathVariable("id") @NotBlank String id, @PathVariable("crewId") @NotBlank String crewId, @RequestBody List<Map<String, Object>> updates) {
+
+		Result<Crew> result = movies.updateCrew(id, crewId, updates);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+
+	}
+
+	@DeleteMapping(path = "{id}/crew/{crewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> deleteCrew(@PathVariable("id") @NotBlank String id, @PathVariable("crewId") @NotBlank String crewId) {
+
+		Result<Crew> result = movies.deleteCrew(id, crewId);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
@@ -197,7 +194,7 @@ public class MovieController {
 		List<Sort.Order> criteria = SortUtil.getCriteria(sort);
 
 		ExampleMatcher matcher = ExampleMatcher
-				.matchingAny()
+				.matchingAll()
 				.withIgnoreCase()
 				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
@@ -206,56 +203,32 @@ public class MovieController {
 				matcher
 		);
 
-		Optional<Page<Assessment>> dbAssessments = assessments.get(page, size, Sort.by(criteria), filter);
-
-		if (dbAssessments.isPresent()) {
-			return ResponseHandler.generateResponse(false, "ok", 0, dbAssessments.get().getContent(), getEntityModel(), HttpStatus.OK);
-		} else {
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-		}
+		Result<List<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@PostMapping(path = "{id}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> createAssessment(@PathVariable("id") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
 
-		Optional<Assessment> createResult = assessments.createForMovie(movieId, assessment);
-
-		if (createResult.isPresent()) {
-			return ResponseHandler.generateResponse(false, "ok", 0, createResult, getEntityModel(), HttpStatus.CREATED);
-		} else {
-			return ResponseHandler.generateResponse(true, "error", 0, createResult, getEntityModel(), HttpStatus.CONFLICT);
-		}
+		Result<Assessment> result = assessments.createForMovie(movieId, assessment);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
-	@PatchMapping(path = "{movieId}/assessment/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PatchMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> updateAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
-		Optional<Assessment> result = assessments.update(assessmentId, updates);
-
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result, getEntityModel(), HttpStatus.OK);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, result, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<Assessment> result = assessments.update(assessmentId, updates);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@DeleteMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> deleteAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
-		Optional<Assessment> createResult = assessments.delete(assessmentId);
-
-		if (createResult.isPresent()) {
-			return ResponseHandler.generateResponse(false, "ok", 0, createResult, getEntityModel(), HttpStatus.OK);
-		} else {
-			return ResponseHandler.generateResponse(true, "error", 0, createResult, getEntityModel(), HttpStatus.NOT_FOUND);
-		}
+		Result<Assessment> result = assessments.delete(assessmentId);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 

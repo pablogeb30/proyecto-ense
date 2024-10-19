@@ -3,6 +3,8 @@ package usc.etse.grei.ense.p3.project.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,28 +19,59 @@ public class Movie {
 
 	@Id
 	@NotBlank(message = "The title field can not be empty", groups = OnRelation.class)
+	@Null(groups = OnCreate.class)
 	private String id;
 
-	@NotBlank(message = "The title field can not be empty", groups = {OnCreate.class, OnRelation.class})
-	@Size(min = 2, max = 256)
+	@NotBlank(message = "The title field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	private String title;
 
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private String overview;
+
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private String tagline;
-	private Collection collection;
-	private List<String> genres;
 
 	@Valid
+	@Null(groups = OnRelation.class)
+	private Collection collection;
+
+	@Null(groups = OnRelation.class)
+	private List<@NotBlank(message = "The genre can not be empyt", groups = {OnCreate.class, OnUpdate.class}) String> genres;
+
+	@Valid
+	@Null(groups = OnRelation.class)
 	private Date releaseDate;
 
-	private List<String> keywords;
+	@Null(groups = OnRelation.class)
+	private List<@NotBlank(message = "The genre can not be empyt", groups = {OnCreate.class, OnUpdate.class}) String> keywords;
+
+	@Null(groups = OnRelation.class)
 	private List<@Valid Producer> producers;
+
+	@Null(groups = {OnCreate.class, OnRelation.class})
 	private List<@Valid Crew> crew;
+
+	@Null(groups = {OnCreate.class, OnRelation.class})
 	private List<@Valid Cast> cast;
-	private List<Resource> resources;
+
+	@Null(groups = OnRelation.class)
+	private List<@Valid Resource> resources;
+
+	@Positive(groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private Long budget;
+
+	@Null(groups = OnRelation.class)
 	private Status status;
+
+	@Positive(groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private Integer runtime;
+
+	@Null(groups = OnRelation.class)
 	private Long revenue;
 
 	public Movie() {

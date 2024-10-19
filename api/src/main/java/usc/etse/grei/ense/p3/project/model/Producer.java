@@ -2,6 +2,7 @@ package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -9,10 +10,13 @@ import java.util.StringJoiner;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Producer {
 
-	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class})
+	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
 	private String name;
 
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
 	private String logo;
+
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
 	private String country;
 
 	public Producer() {

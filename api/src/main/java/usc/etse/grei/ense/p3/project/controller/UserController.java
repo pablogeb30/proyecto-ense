@@ -5,10 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +19,6 @@ import usc.etse.grei.ense.p3.project.util.SortUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -146,56 +143,32 @@ public class UserController {
 				matcher
 		);
 
-		Optional<Page<Assessment>> dbAssessments = assessments.get(page, size, Sort.by(criteria), filter);
-
-		if (dbAssessments.isPresent()) {
-			return ResponseHandler.generateResponse(false, "ok", 0, dbAssessments.get().getContent(), getEntityModel(), HttpStatus.OK);
-		} else {
-			return ResponseHandler.generateResponse(true, "error", 0, null, getEntityModel(), HttpStatus.NOT_FOUND);
-		}
+		Result<List<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@PostMapping(path = "{id}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> createAssessment(@PathVariable("id") @NotBlank String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
 
-		Optional<Assessment> createResult = assessments.createForUser(userId, assessment);
-
-		if (createResult.isPresent()) {
-			return ResponseHandler.generateResponse(false, "ok", 0, createResult, getEntityModel(), HttpStatus.CREATED);
-		} else {
-			return ResponseHandler.generateResponse(true, "error", 0, createResult, getEntityModel(), HttpStatus.CONFLICT);
-		}
+		Result<Assessment> result = assessments.createForUser(userId, assessment);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
-	@PatchMapping(path = "{userId}/assessment/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PatchMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> updateAssessment(@PathVariable("userId") @NotBlank String userId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
-		Optional<Assessment> result = assessments.update(assessmentId, updates);
-
-		if (result.isPresent()) {
-
-			return ResponseHandler.generateResponse(false, "ok", 0, result, getEntityModel(), HttpStatus.OK);
-
-		} else {
-
-			return ResponseHandler.generateResponse(true, "error", 0, result, getEntityModel(), HttpStatus.NOT_FOUND);
-
-		}
+		Result<Assessment> result = assessments.update(assessmentId, updates);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	@DeleteMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> deleteAssessment(@PathVariable("userId") @NotBlank String userId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
-		Optional<Assessment> createResult = assessments.delete(assessmentId);
-
-		if (createResult.isPresent()) {
-			return ResponseHandler.generateResponse(false, "ok", 0, createResult, getEntityModel(), HttpStatus.OK);
-		} else {
-			return ResponseHandler.generateResponse(true, "error", 0, createResult, getEntityModel(), HttpStatus.NOT_FOUND);
-		}
+		Result<Assessment> result = assessments.delete(assessmentId);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 

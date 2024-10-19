@@ -42,14 +42,9 @@ public class UserService {
 		Criteria criteria = Criteria.byExample(filter);
 
 		Query query = Query.query(criteria).with(request);
-		query.fields().include("name", "country", "birthday", "picture");
-		query.fields().exclude("_id");
+		query.fields().include("_id", "name", "country", "birthday", "picture");
 
 		List<User> result = mongo.find(query, User.class);
-
-		if (result.isEmpty()) {
-			return new Result<>(null, false, "No users", 0, Result.Code.NOT_FOUND);
-		}
 
 		return new Result<>(result, false, "Users data", 0, Result.Code.OK);
 
@@ -57,12 +52,11 @@ public class UserService {
 
 	public Result<User> get(String email) {
 
-		Optional<User> result = users.findById(email);
+		User result = users.findById(email).orElse(null);
 
-		if (result.isPresent()) {
+		if (result != null) {
 
-			User user = result.get();
-			return new Result<>(user, false, "User data", 0, Result.Code.OK);
+			return new Result<>(result, false, "User data", 0, Result.Code.OK);
 
 		} else {
 
@@ -75,6 +69,12 @@ public class UserService {
 	public Result<User> create(User user) {
 
 		try {
+
+			User existingUser = users.findById(user.getEmail()).orElse(null);
+
+			if (existingUser != null) {
+				return new Result<>(null, false, "User already exists", 0, Result.Code.CONFLICT);
+			}
 
 			Date date = user.getBirthday();
 
@@ -105,16 +105,20 @@ public class UserService {
 				return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
 			}
 
-			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday") || op.get("path").equals("/friends")));
+			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday") || ((String) op.get("path")).startsWith("/friends")));
 
 			User filteredUser = patchUtil.patch(originalUser, operations);
+			List<User> friendsCopy = filteredUser.getFriends();
+			filteredUser.setFriends(null);
 
 			Set<ConstraintViolation<User>> violations = validator.validate(filteredUser, OnUpdate.class);
 
 			if (!violations.isEmpty()) {
+				System.out.println(violations);
 				return new Result<>(null, true, "Not valid due to violations", 0, Result.Code.BAD_REQUEST);
 			}
 
+			filteredUser.setFriends(friendsCopy);
 			User updatedUser = users.save(filteredUser);
 
 			ExampleMatcher matcher = ExampleMatcher.matching();

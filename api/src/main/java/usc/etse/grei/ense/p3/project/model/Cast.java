@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Cast extends Person {
 
-	@NotBlank(message = "The character field can not be empty", groups = {OnCreate.class, OnRelation.class})
+	@NotBlank(message = "The character field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	private String character;
 
 	public Cast() {

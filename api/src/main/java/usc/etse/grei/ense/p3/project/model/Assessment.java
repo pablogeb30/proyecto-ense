@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,21 +17,23 @@ import java.util.StringJoiner;
 public class Assessment {
 
 	@Id
+	@NotNull(message = "The id field can not be empty", groups = OnUpdate.class)
 	@Null(message = "The rating field need to be null", groups = {OnUserCreate.class, OnMovieCreate.class})
 	private String id;
 
-	@NotNull(message = "The rating field can not be empty", groups = {OnUserCreate.class, OnMovieCreate.class})
-	@Range(min = 1, max = 10)
+	@NotNull(message = "The rating field can not be empty", groups = {OnUserCreate.class, OnMovieCreate.class, OnUpdate.class})
+	@Range(min = 1, max = 10, groups = {OnUserCreate.class, OnMovieCreate.class, OnUpdate.class})
 	private Integer rating;
 
 	@Valid
-	@NotNull(message = "The user field can not be empty", groups = OnMovieCreate.class)
+	@NotNull(message = "The user field can not be empty", groups = {OnMovieCreate.class, OnUpdate.class})
 	private User user;
 
 	@Valid
-	@NotNull(message = "The movie field can not be empty", groups = OnUserCreate.class)
+	@NotNull(message = "The movie field can not be empty", groups = {OnUserCreate.class, OnUpdate.class})
 	private Movie movie;
 
+	@Size(min = 1, max = 500, message = "The comment field must be between 1 and 500 characters", groups = {OnUserCreate.class, OnMovieCreate.class, OnUpdate.class})
 	private String comment;
 
 	public Assessment() {

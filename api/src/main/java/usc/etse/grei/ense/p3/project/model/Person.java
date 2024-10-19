@@ -3,6 +3,7 @@ package usc.etse.grei.ense.p3.project.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,21 +16,32 @@ import java.util.StringJoiner;
 public class Person {
 
 	@Id
-	@NotBlank(message = "The title field can not be empty", groups = OnRelation.class)
+	@NotBlank(message = "The id field can not be empty", groups = {OnUpdate.class, OnRelation.class})
+	@Null(groups = OnCreate.class)
 	private String id;
 
-	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class})
-	@Size(min = 2, max = 256)
+	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	private String name;
 
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private String country;
+
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private String picture;
+
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
+	@Null(groups = OnRelation.class)
 	private String biography;
 
 	@Valid
+	@Null(groups = OnRelation.class)
 	private Date birthday;
 
 	@Valid
+	@Null(groups = OnRelation.class)
 	private Date deathday;
 
 	public Person() {

@@ -4,11 +4,11 @@ import org.springframework.http.HttpStatus;
 
 public class Result<T> {
 
-	private T result;
-	private boolean error;
-	private String messaje;
-	private Integer internalCode;
-	private Code externalCode;
+	private final T result;
+	private final boolean error;
+	private final String messaje;
+	private final Integer internalCode;
+	private final Code externalCode;
 
 	public Result(T result, boolean error, String messaje, Integer internalCode, Code externalCode) {
 		this.result = result;

@@ -52,7 +52,8 @@ public class MovieController {
 			@RequestParam(name = "keywords", required = false, defaultValue = "") List<String> keywords,
 			@RequestParam(name = "genres", required = false, defaultValue = "") List<String> genres,
 			@RequestParam(name = "releaseDate", required = false, defaultValue = "") String releaseDate,
-			@RequestParam(name = "cast", required = false, defaultValue = "") List<String> cast
+			@RequestParam(name = "cast", required = false, defaultValue = "") List<String> cast,
+			@RequestParam(name = "crew", required = false, defaultValue = "") List<String> crew
 	) {
 
 		List<Sort.Order> criteria = SortUtil.getCriteria(sort);
@@ -126,9 +127,9 @@ public class MovieController {
 
 		List<Crew> crewList = new ArrayList<>();
 
-		if (!cast.isEmpty()) {
+		if (!crew.isEmpty()) {
 
-			for (String crewString : cast) {
+			for (String crewString : crew) {
 
 				Crew newCrew = new Crew();
 
@@ -199,9 +200,9 @@ public class MovieController {
 	}
 
 	@PostMapping(path = "{id}/cast", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> addCast(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Cast cast) {
+	ResponseEntity<Object> createCast(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Cast cast) {
 
-		Result<Cast> result = movies.addCast(id, cast);
+		Result<Cast> result = movies.createCast(id, cast);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
@@ -223,9 +224,9 @@ public class MovieController {
 	}
 
 	@PostMapping(path = "{id}/crew", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> addCrew(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Crew crew) {
+	ResponseEntity<Object> createCrew(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Crew crew) {
 
-		Result<Crew> result = movies.addCrew(id, crew);
+		Result<Crew> result = movies.createCrew(id, crew);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
@@ -246,9 +247,9 @@ public class MovieController {
 
 	}
 
-	@GetMapping(path = "{id}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> getAssessments(
-			@PathVariable("id") @NotBlank String id,
+			@PathVariable("movieId") @NotBlank String movieId,
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "size", defaultValue = "20") int size,
 			@RequestParam(name = "sort", defaultValue = "") List<String> sort
@@ -262,7 +263,7 @@ public class MovieController {
 				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
 		Example<Assessment> filter = Example.of(
-				new Assessment().setMovie(new Movie().setId(id)),
+				new Assessment().setMovie(new Movie().setId(movieId)),
 				matcher
 		);
 
@@ -271,8 +272,8 @@ public class MovieController {
 
 	}
 
-	@PostMapping(path = "{id}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> createAssessment(@PathVariable("id") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
+	@PostMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> createAssessment(@PathVariable("movieId") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForMovie(movieId, assessment);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());

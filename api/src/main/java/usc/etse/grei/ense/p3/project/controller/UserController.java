@@ -20,9 +20,6 @@ import usc.etse.grei.ense.p3.project.util.SortUtil;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 @RestController
 @RequestMapping("users")
 public class UserController {
@@ -40,9 +37,6 @@ public class UserController {
 
 		User user = new User();
 		EntityModel<User> entityModel = EntityModel.of(user);
-
-		entityModel.add(linkTo(methodOn(UserController.class).getUser("email@email.com")).withSelfRel());
-		entityModel.add(linkTo(methodOn(UserController.class).getUsers(0, 0, null, "", "")).withRel("users"));
 
 		return entityModel;
 
@@ -107,9 +101,9 @@ public class UserController {
 	}
 
 	@PostMapping(path = "{email}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> addFriend(@PathVariable("email") @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
+	ResponseEntity<Object> createFriend(@PathVariable("email") @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
 
-		Result<User> result = users.addFriend(email, friend, true);
+		Result<User> result = users.createFriend(email, friend, true);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 
@@ -123,9 +117,9 @@ public class UserController {
 
 	}
 
-	@GetMapping(path = "{id}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> getAssessments(
-			@PathVariable("id") @NotBlank String userId,
+			@PathVariable("userId") @NotBlank String userId,
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "size", defaultValue = "20") int size,
 			@RequestParam(name = "sort", defaultValue = "") List<String> sort
@@ -148,8 +142,8 @@ public class UserController {
 
 	}
 
-	@PostMapping(path = "{id}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> createAssessment(@PathVariable("id") @NotBlank String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
+	@PostMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> createAssessment(@PathVariable("userId") @NotBlank String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForUser(userId, assessment);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());

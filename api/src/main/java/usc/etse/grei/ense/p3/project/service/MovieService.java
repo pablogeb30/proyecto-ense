@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import usc.etse.grei.ense.p3.project.model.Date;
 import usc.etse.grei.ense.p3.project.model.*;
 import usc.etse.grei.ense.p3.project.repository.AssessmentRepository;
 import usc.etse.grei.ense.p3.project.repository.MovieRepository;
@@ -16,7 +15,10 @@ import usc.etse.grei.ense.p3.project.repository.PersonRepository;
 import usc.etse.grei.ense.p3.project.util.PatchUtil;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,6 +88,7 @@ public class MovieService {
 		}
 
 		Query query = Query.query(criteria).with(request);
+		query.fields().include("_id", "title", "overview", "genres", "releaseDate", "resources");
 
 		List<Movie> result = mongo.find(query, Movie.class);
 
@@ -97,15 +100,13 @@ public class MovieService {
 
 		Movie result = movies.findById(id).orElse(null);
 
-		if (result != null) {
-
-			return new Result<>(result, false, "Movie found", 0, Result.Code.OK);
-
-		} else {
+		if (result == null) {
 
 			return new Result<>(null, false, "No movie", 0, Result.Code.NOT_FOUND);
 
 		}
+
+		return new Result<>(result, false, "Movie found", 0, Result.Code.OK);
 
 	}
 
@@ -114,9 +115,9 @@ public class MovieService {
 		try {
 
 			Example<Movie> testMovie = Example.of(new Movie().setTitle(movie.getTitle()));
-			Optional<Movie> result = movies.findOne(testMovie);
+			Movie result = movies.findOne(testMovie).orElse(null);
 
-			if (result.isPresent()) {
+			if (result != null) {
 				return new Result<>(null, false, "Movie already exists", 0, Result.Code.CONFLICT);
 			}
 
@@ -239,7 +240,7 @@ public class MovieService {
 
 	}
 
-	public Result<Cast> addCast(String id, Cast cast) {
+	public Result<Cast> createCast(String id, Cast cast) {
 
 		Movie movie = movies.findById(id).orElse(null);
 
@@ -337,7 +338,7 @@ public class MovieService {
 
 	}
 
-	public Result<Crew> addCrew(String id, Crew crew) {
+	public Result<Crew> createCrew(String id, Crew crew) {
 
 		Movie movie = movies.findById(id).orElse(null);
 
@@ -399,7 +400,6 @@ public class MovieService {
 			Set<ConstraintViolation<Crew>> violations = validator.validate(filteredCrew, OnRelation.class);
 
 			if (!violations.isEmpty()) {
-				System.out.println(violations);
 				return new Result<>(null, true, "Invalid crew", 0, Result.Code.BAD_REQUEST);
 			}
 

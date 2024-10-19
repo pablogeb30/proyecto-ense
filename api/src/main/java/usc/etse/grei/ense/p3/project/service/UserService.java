@@ -42,7 +42,7 @@ public class UserService {
 		Criteria criteria = Criteria.byExample(filter);
 
 		Query query = Query.query(criteria).with(request);
-		query.fields().include("_id", "name", "country", "birthday", "picture");
+		query.fields().include("name", "country", "birthday", "picture");
 
 		List<User> result = mongo.find(query, User.class);
 
@@ -54,15 +54,11 @@ public class UserService {
 
 		User result = users.findById(email).orElse(null);
 
-		if (result != null) {
-
-			return new Result<>(result, false, "User data", 0, Result.Code.OK);
-
-		} else {
-
+		if (result == null) {
 			return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
-
 		}
+
+		return new Result<>(result, false, "User data", 0, Result.Code.OK);
 
 	}
 
@@ -114,7 +110,6 @@ public class UserService {
 			Set<ConstraintViolation<User>> violations = validator.validate(filteredUser, OnUpdate.class);
 
 			if (!violations.isEmpty()) {
-				System.out.println(violations);
 				return new Result<>(null, true, "Not valid due to violations", 0, Result.Code.BAD_REQUEST);
 			}
 
@@ -204,7 +199,7 @@ public class UserService {
 
 	}
 
-	public Result<User> addFriend(String email, User friend, boolean redo) {
+	public Result<User> createFriend(String email, User friend, boolean redo) {
 
 		User user = users.findById(email).orElse(null);
 
@@ -215,7 +210,7 @@ public class UserService {
 		User bdFriend = users.findById(friend.getEmail()).orElse(null);
 
 		if (user.equals(bdFriend)) {
-			return new Result<>(null, false, "Recursive aditions not allowed", 0, Result.Code.UNAUTHORIZED);
+			return new Result<>(null, false, "Recursive adition", 0, Result.Code.BAD_REQUEST);
 		}
 
 		if (bdFriend == null || !bdFriend.getName().equals(friend.getName())) {
@@ -236,7 +231,7 @@ public class UserService {
 
 		if (redo) {
 			User parseUser = new User().setEmail(user.getEmail()).setName(user.getName());
-			addFriend(bdFriend.getEmail(), parseUser, false);
+			createFriend(bdFriend.getEmail(), parseUser, false);
 		}
 
 		return new Result<>(user, false, "Friend added", 0, Result.Code.CREATED);
@@ -251,16 +246,16 @@ public class UserService {
 			return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
 		}
 
-		User friend = users.findById(friendEmail).orElse(null);
-
-		if (friend == null) {
-			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
-		}
-
 		List<User> friends = user.getFriends();
 
 		if (friends == null) {
 			return new Result<>(null, false, "No friends", 0, Result.Code.NOT_FOUND);
+		}
+
+		User friend = users.findById(friendEmail).orElse(null);
+
+		if (friend == null) {
+			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
 		}
 
 		friends.removeIf(f -> f.getEmail().equals(friendEmail));

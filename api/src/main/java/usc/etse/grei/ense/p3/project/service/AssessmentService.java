@@ -19,7 +19,6 @@ import usc.etse.grei.ense.p3.project.util.PatchUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -73,9 +72,9 @@ public class AssessmentService {
 
 			assessment.setMovie(relationMovie);
 
-			Optional<User> existUser = users.findById(assessment.getUser().getEmail());
+			User existUser = users.findById(assessment.getUser().getEmail()).orElse(null);
 
-			if (existUser.isEmpty()) {
+			if (existUser == null) {
 				return new Result<>(null, false, "User not found", 0, Result.Code.NOT_FOUND);
 			}
 
@@ -107,9 +106,9 @@ public class AssessmentService {
 
 			assessment.setUser(relationUser);
 
-			Optional<Movie> existMovie = movies.findById(assessment.getMovie().getId());
+			Movie existMovie = movies.findById(assessment.getMovie().getId()).orElse(null);
 
-			if (existMovie.isEmpty()) {
+			if (existMovie == null) {
 				return new Result<>(null, false, "Movie not found", 0, Result.Code.NOT_FOUND);
 			}
 
@@ -142,7 +141,6 @@ public class AssessmentService {
 			Set<ConstraintViolation<Assessment>> violations = validator.validate(filteredAssessment, OnRelation.class);
 
 			if (!violations.isEmpty()) {
-				System.out.println(violations);
 				return new Result<>(null, true, "Not valid due to violations", 0, Result.Code.BAD_REQUEST);
 			}
 

@@ -21,6 +21,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio que implementa la lógica de negocio para películas
+ */
 @Service
 public class MovieService {
 
@@ -41,6 +44,17 @@ public class MovieService {
 		this.validator = validator;
 	}
 
+	/**
+	 * Metodo que obtiene una lista de películas utilizando filtrado y ordenación
+	 *
+	 * @param page número de página
+	 * @param size número de películas por página
+	 * @param sort criterio de ordenación
+	 * @param filter criterio de filtrado por película
+	 * @param castList criterio de filtrado por reparto
+	 * @param crewList criterio de filtrado por equipo de trabajo
+	 * @return resultado de la búsqueda
+	 */
 	public Result<List<Movie>> get(int page, int size, Sort sort, Example<Movie> filter, List<Cast> castList, List<Crew> crewList) {
 
 		Pageable request = PageRequest.of(page, size, sort);
@@ -96,6 +110,12 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que obtiene una película a partir de su id
+	 *
+	 * @param id identificador de la película
+	 * @return resultado de la búsqueda
+	 */
 	public Result<Movie> get(String id) {
 
 		Movie result = movies.findById(id).orElse(null);
@@ -110,6 +130,12 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que inserta una película en la base de datos
+	 *
+	 * @param movie película que se inserta
+	 * @return resultado de la inserción
+	 */
 	public Result<Movie> create(Movie movie) {
 
 		try {
@@ -145,6 +171,13 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que modifica la información de una película almacenada
+	 *
+	 * @param id identificador de la pelicula modificada
+	 * @param operations operaciones de modificación
+	 * @return resultado de la modificación
+	 */
 	public Result<Movie> update(String id, List<Map<String, Object>> operations) {
 
 		try {
@@ -218,6 +251,12 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que elimina una película de la base de datos
+	 *
+	 * @param id identificador de la película eliminada
+	 * @return resultado de la eliminación
+	 */
 	public Result<Movie> delete(String id) {
 
 		Movie movie = movies.findById(id).orElse(null);
@@ -240,6 +279,13 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que añade un actor al reparto de una película
+	 *
+	 * @param id identificador de la película
+	 * @param cast actor añadido al reparto de la película
+	 * @return resultado de la inserción
+	 */
 	public Result<Cast> createCast(String id, Cast cast) {
 
 		Movie movie = movies.findById(id).orElse(null);
@@ -267,6 +313,14 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que modifica la información de un actor del reparto de una película
+	 *
+	 * @param id identificador de la película
+	 * @param castId identificador del actor
+	 * @param operations operaciones de modificación
+	 * @return resultado de la modificación
+	 */
 	public Result<Cast> updateCast(String id, String castId, List<Map<String, Object>> operations) {
 
 		try {
@@ -312,6 +366,13 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que elimina un actor del reparto de una película
+	 *
+	 * @param id identificador de la película
+	 * @param castId identificador del actor
+	 * @return resultado de la eliminación
+	 */
 	public Result<Cast> deleteCast(String id, String castId) {
 
 		Movie movie = movies.findById(id).orElse(null);
@@ -338,6 +399,13 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que añade un trabajador al equipo de una película
+	 *
+	 * @param id identificador de la película
+	 * @param crew trabajador que se añade
+	 * @return resultado de la inserción
+	 */
 	public Result<Crew> createCrew(String id, Crew crew) {
 
 		Movie movie = movies.findById(id).orElse(null);
@@ -373,6 +441,14 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que modifica la información de un trabajador del equipo de una película
+	 *
+	 * @param id identificador de la película
+	 * @param crewId identificador del trabajador
+	 * @param operations operaciones de modificación
+	 * @return resultado de la modificación
+	 */
 	public Result<Crew> updateCrew(String id, String crewId, List<Map<String, Object>> operations) {
 
 		try {
@@ -418,6 +494,13 @@ public class MovieService {
 
 	}
 
+	/**
+	 * Metodo que elimina un trabajador del equipo de una película
+	 *
+	 * @param id identificador de la película
+	 * @param crewId identificador del trabajador
+	 * @return resultado de la eliminación
+	 */
 	public Result<Crew> deleteCrew(String id, String crewId) {
 
 		Movie movie = movies.findById(id).orElse(null);

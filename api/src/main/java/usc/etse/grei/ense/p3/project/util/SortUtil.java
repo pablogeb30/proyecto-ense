@@ -6,8 +6,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio que implementa los criterios de ordenación
+ */
 public class SortUtil {
 
+	/**
+	 * Metodo que convierte una lista de cadenas en criterios de ordenación
+	 *
+	 * @param sort cadenas con los criterios para cada campo
+	 * @return criterios de ordenación
+	 */
 	public static List<Sort.Order> getCriteria(List<String> sort) {
 
 		List<Sort.Order> criteria = sort.stream().map(string -> {

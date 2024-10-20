@@ -268,6 +268,10 @@ public class UserService {
 			friends = new ArrayList<>();
 		}
 
+		if (friends.stream().anyMatch(f -> f.getEmail().equals(bdFriend.getEmail()))){
+			return new Result<>(null, false, "Friend already added", 0, Result.Code.BAD_REQUEST);
+		}
+
 		friends.add(friend);
 
 		user.setFriends(friends);

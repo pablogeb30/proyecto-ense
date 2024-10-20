@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Servicio que implementa la lógica de negocio para comentarios
+ */
 @Service
 public class AssessmentService {
 
@@ -41,6 +44,15 @@ public class AssessmentService {
 		this.validator = validator;
 	}
 
+	/**
+	 * Metodo que obtiene una lista de comentarios utilizando filtrado y ordenación
+	 *
+	 * @param page número de página
+	 * @param size número de comentarios por página
+	 * @param sort criterio de ordenación
+	 * @param filter criterio de filtrado por usuario o película
+	 * @return resultado de la búsqueda
+	 */
 	public Result<List<Assessment>> get(int page, int size, Sort sort, Example<Assessment> filter) {
 
 		Pageable request = PageRequest.of(page, size, sort);
@@ -56,6 +68,13 @@ public class AssessmentService {
 
 	}
 
+	/**
+	 * Metodo que añade un comentario a la base de datos a partir de la película
+	 *
+	 * @param movieId identificador de la película
+	 * @param assessment comentario añadido
+	 * @return resultado de la inserción
+	 */
 	public Result<Assessment> createForMovie(String movieId, Assessment assessment) {
 
 		try {
@@ -90,6 +109,13 @@ public class AssessmentService {
 
 	}
 
+	/**
+	 * Metodo que añade un comentario a la base de datos a partir del usuario
+	 *
+	 * @param userId identificador del usuario
+	 * @param assessment comentario añadido
+	 * @return resultado de la inserción
+	 */
 	public Result<Assessment> createForUser(String userId, Assessment assessment) {
 
 		try {
@@ -124,6 +150,13 @@ public class AssessmentService {
 
 	}
 
+	/**
+	 * Metodo que modifica la información de un comentario existente
+	 *
+	 * @param assessmentId identificador del comentario
+	 * @param operations lista de operaciones de modificación
+	 * @return resultado de la modificación
+	 */
 	public Result<Assessment> update(String assessmentId, List<Map<String, Object>> operations) {
 
 		try {
@@ -156,6 +189,12 @@ public class AssessmentService {
 
 	}
 
+	/**
+	 * Metodo que elimina un comentario de la base de datos
+	 *
+	 * @param assessmentId identificador del comentario
+	 * @return resultado de la eliminación
+	 */
 	public Result<Assessment> delete(String assessmentId) {
 
 		Assessment assessment = assessments.findById(assessmentId).orElse(null);

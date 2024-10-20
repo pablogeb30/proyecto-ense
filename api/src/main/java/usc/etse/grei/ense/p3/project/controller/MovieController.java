@@ -53,7 +53,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operacion GET /movies
+	 * Metodo que gestiona la operación GET /movies
 	 *
 	 * @param page número de página
 	 * @param size número de películas por página
@@ -261,7 +261,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación PATCH /movies/{id}/cast/{castID}
+	 * Metodo que gestiona la operación PATCH /movies/{id}/cast/{castId}
 	 *
 	 * @param id identificador de la película
 	 * @param castId identificador del actor
@@ -277,7 +277,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación DELETE /movies/{id}/cast/{castID}
+	 * Metodo que gestiona la operación DELETE /movies/{id}/cast/{castId}
 	 *
 	 * @param id identificador de la película
 	 * @param castId identificador del actor
@@ -307,7 +307,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación PATCH /movies/{id}/crew/{crewID}
+	 * Metodo que gestiona la operación PATCH /movies/{id}/crew/{crewId}
 	 *
 	 * @param id identificador de la película
 	 * @param crewId identificador del trabajador
@@ -323,7 +323,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación DELETE /movies/{id}/crew/{crewID}
+	 * Metodo que gestiona la operación DELETE /movies/{id}/crew/{crewId}
 	 *
 	 * @param id identificador de la película
 	 * @param crewId identificador del trabajador
@@ -338,7 +338,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación GET /movies/{movieID}/assessments
+	 * Metodo que gestiona la operación GET /movies/{movieId}/assessments
 	 *
 	 * @param movieId identificador de la película
 	 * @param page número de página
@@ -372,7 +372,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación POST /movies/{movieID}/assessments
+	 * Metodo que gestiona la operación POST /movies/{movieId}/assessments
 	 *
 	 * @param movieId identificador de la película
 	 * @param assessment comentario añadido
@@ -387,7 +387,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación PATCH /movies/{movieID}/assessments/{assessmentID}
+	 * Metodo que gestiona la operación PATCH /movies/{movieId}/assessments/{assessmentId}
 	 *
 	 * @param movieId identificador de la película
 	 * @param assessmentId identificador del comentario
@@ -403,7 +403,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación DELETE /movies/{movieID}/assessments/{assessmentID}
+	 * Metodo que gestiona la operación DELETE /movies/{movieId}/assessments/{assessmentId}
 	 *
 	 * @param movieId identificador de la película
 	 * @param assessmentId identificador del comentario

@@ -17,6 +17,9 @@ import usc.etse.grei.ense.p3.project.util.PatchUtil;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * Servicio que implementa la lógica de negocio para usuarios
+ */
 @Service
 public class UserService {
 
@@ -35,6 +38,15 @@ public class UserService {
 		this.validator = validator;
 	}
 
+	/**
+	 * Metodo que obtiene una lista de usuarios utilizando filtrado y ordenación
+	 *
+	 * @param page número de página
+	 * @param size número de usuarios por página
+	 * @param sort criterio de ordenación
+	 * @param filter criterio de filtrado por nombre o dirección de correo
+	 * @return resultado de la búsqueda
+	 */
 	public Result<List<User>> get(int page, int size, Sort sort, Example<User> filter) {
 
 		Pageable request = PageRequest.of(page, size, sort);
@@ -50,6 +62,12 @@ public class UserService {
 
 	}
 
+	/**
+	 * Metodo que obtiene un usuario a partir de su email
+	 *
+	 * @param email correo electrónico del usuario
+	 * @return resultado de la búsqueda
+	 */
 	public Result<User> get(String email) {
 
 		User result = users.findById(email).orElse(null);
@@ -62,6 +80,12 @@ public class UserService {
 
 	}
 
+	/**
+	 * Metodo que añade un usuario a la base de datos
+	 *
+	 * @param user usuario añadido
+	 * @return resultado de la inserción
+	 */
 	public Result<User> create(User user) {
 
 		try {
@@ -91,6 +115,13 @@ public class UserService {
 
 	}
 
+	/**
+	 * Metodo que modifica la información de un usuario existente
+	 *
+	 * @param email correo electrónico del usuario
+	 * @param operations lista de operaciones de modificación
+	 * @return resultado de la modificación
+	 */
 	public Result<User> update(String email, List<Map<String, Object>> operations) {
 
 		try {
@@ -169,6 +200,12 @@ public class UserService {
 
 	}
 
+	/**
+	 * Metodo que elimina un usuario de la base de datos
+	 *
+	 * @param email correo electrónico del usuario
+	 * @return resultado de la eliminación
+	 */
 	public Result<User> delete(String email) {
 
 		Optional<User> result = users.findById(email);
@@ -199,6 +236,14 @@ public class UserService {
 
 	}
 
+	/**
+	 * Metodo que añade un usuario a la lista de amigos de otro usuario
+	 *
+	 * @param email correo electrónico del usuario actual
+	 * @param friend usuario añadido a la lista de amigos del usuario actual
+	 * @param redo booleano que indica si la inserción se realiza en ambas direcciones
+	 * @return resultado de la inserción
+	 */
 	public Result<User> createFriend(String email, User friend, boolean redo) {
 
 		User user = users.findById(email).orElse(null);
@@ -209,12 +254,12 @@ public class UserService {
 
 		User bdFriend = users.findById(friend.getEmail()).orElse(null);
 
-		if (user.equals(bdFriend)) {
-			return new Result<>(null, false, "Recursive adition", 0, Result.Code.BAD_REQUEST);
-		}
-
 		if (bdFriend == null || !bdFriend.getName().equals(friend.getName())) {
 			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
+		}
+
+		if (user.equals(bdFriend)) {
+			return new Result<>(null, false, "Recursive adition", 0, Result.Code.BAD_REQUEST);
 		}
 
 		List<User> friends = user.getFriends();
@@ -238,6 +283,14 @@ public class UserService {
 
 	}
 
+	/**
+	 * Metodo que elimina a un usuario de la lista de amigos de otro usuario
+	 *
+	 * @param email correo electrónico del usuario actual
+	 * @param friendEmail correo electrónico del usuario eliminado de la lista de amigos
+	 * @param redo booleano que indica si la eliminación se realiza en ambas direcciones
+	 * @return resultado de la eliminación
+	 */
 	public Result<User> deleteFriend(String email, String friendEmail, boolean redo) {
 
 		User user = users.findById(email).orElse(null);

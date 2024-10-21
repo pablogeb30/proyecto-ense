@@ -315,6 +315,10 @@ public class UserService {
 			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
 		}
 
+		if (friends.stream().noneMatch(f -> f.getEmail().equals(friendEmail))){
+			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
+		}
+
 		friends.removeIf(f -> f.getEmail().equals(friendEmail));
 
 		user.setFriends(friends);

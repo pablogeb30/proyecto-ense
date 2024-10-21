@@ -121,9 +121,7 @@ public class MovieService {
 		Movie result = movies.findById(id).orElse(null);
 
 		if (result == null) {
-
 			return new Result<>(null, false, "No movie", 0, Result.Code.NOT_FOUND);
-
 		}
 
 		return new Result<>(result, false, "Movie found", 0, Result.Code.OK);

@@ -205,7 +205,7 @@ public class MovieController {
 	/**
 	 * Metodo que gestiona la operación POST /movies
 	 *
-	 * @param movie película recibida
+	 * @param movie película añadida
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)

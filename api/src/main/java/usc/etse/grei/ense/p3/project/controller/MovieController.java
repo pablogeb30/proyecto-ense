@@ -397,7 +397,7 @@ public class MovieController {
 	@PatchMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> updateAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
-		Result<Assessment> result = assessments.update(assessmentId, updates);
+		Result<Assessment> result = assessments.updateForMovie(movieId, assessmentId, updates);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
@@ -412,7 +412,7 @@ public class MovieController {
 	@DeleteMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> deleteAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
-		Result<Assessment> result = assessments.delete(assessmentId);
+		Result<Assessment> result = assessments.deleteForMovie(movieId, assessmentId);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}

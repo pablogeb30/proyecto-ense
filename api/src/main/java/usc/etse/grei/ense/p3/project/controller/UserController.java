@@ -233,7 +233,7 @@ public class UserController {
 	@PatchMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> updateAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
-		Result<Assessment> result = assessments.update(assessmentId, updates);
+		Result<Assessment> result = assessments.updateForUser(userId, assessmentId, updates);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
@@ -248,7 +248,7 @@ public class UserController {
 	@DeleteMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> deleteAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
-		Result<Assessment> result = assessments.delete(assessmentId);
+		Result<Assessment> result = assessments.deleteForUser(userId, assessmentId);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}

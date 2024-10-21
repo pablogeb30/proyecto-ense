@@ -150,22 +150,40 @@ public class AssessmentService {
 
 	}
 
-	/**
-	 * Metodo que modifica la información de un comentario existente
-	 *
-	 * @param assessmentId identificador del comentario
-	 * @param operations lista de operaciones de modificación
-	 * @return resultado de la modificación
-	 */
-	public Result<Assessment> update(String assessmentId, List<Map<String, Object>> operations) {
+	public Result<Assessment> updateForUser(String userId, String assessmentId, List<Map<String, Object>> operations) {
+
+		Assessment assessment = assessments.findById(assessmentId).orElse(null);
+
+		if (assessment == null || assessment.getUser() == null || !assessment.getUser().getEmail().equals(userId)) {
+			return new Result<>(null, false, "Assessment not found", 0, Result.Code.NOT_FOUND);
+		}
+
+		return update(assessment, operations);
+
+	}
+
+	public Result<Assessment> updateForMovie(String movieId, String assessmentId, List<Map<String, Object>> operations) {
+
+		Assessment assessment = assessments.findById(assessmentId).orElse(null);
+
+		if (assessment == null || assessment.getMovie() == null || !assessment.getMovie().getId().equals(movieId)) {
+			return new Result<>(null, false, "Assessment not found", 0, Result.Code.NOT_FOUND);
+		}
+
+		return update(assessment, operations);
+
+	}
+
+		/**
+		 * Metodo que modifica la información de un comentario existente de un usuario
+		 *
+		 * @param assessment comentario
+		 * @param operations lista de operaciones de modificación
+		 * @return resultado de la modificación
+		 */
+	public Result<Assessment> update(Assessment assessment, List<Map<String, Object>> operations) {
 
 		try {
-
-			Assessment assessment = assessments.findById(assessmentId).orElse(null);
-
-			if (assessment == null) {
-				return new Result<>(null, false, "Assessment not found", 0, Result.Code.NOT_FOUND);
-			}
 
 			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/movie") || op.get("path").equals("/user")));
 
@@ -189,19 +207,37 @@ public class AssessmentService {
 
 	}
 
-	/**
-	 * Metodo que elimina un comentario de la base de datos
-	 *
-	 * @param assessmentId identificador del comentario
-	 * @return resultado de la eliminación
-	 */
-	public Result<Assessment> delete(String assessmentId) {
+	public Result<Assessment> deleteForUser(String userId, String assessmentId) {
 
 		Assessment assessment = assessments.findById(assessmentId).orElse(null);
 
-		if (assessment == null) {
+		if (assessment == null || assessment.getUser() == null || !assessment.getUser().getEmail().equals(userId)) {
 			return new Result<>(null, false, "Assessment not found", 0, Result.Code.NOT_FOUND);
 		}
+
+		return delete(assessment);
+
+	}
+
+	public Result<Assessment> deleteForMovie(String movieId, String assessmentId) {
+
+		Assessment assessment = assessments.findById(assessmentId).orElse(null);
+
+		if (assessment == null || assessment.getMovie() == null || !assessment.getMovie().getId().equals(movieId)) {
+			return new Result<>(null, false, "Assessment not found", 0, Result.Code.NOT_FOUND);
+		}
+
+		return delete(assessment);
+
+	}
+
+	/**
+	 * Metodo que elimina un comentario de un usuario de la base de datos
+	 *
+	 * @param assessment comentario
+	 * @return resultado de la eliminación
+	 */
+	public Result<Assessment> delete(Assessment assessment) {
 
 		assessments.deleteById(assessment.getId());
 

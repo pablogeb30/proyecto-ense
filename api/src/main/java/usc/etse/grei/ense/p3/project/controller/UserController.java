@@ -93,7 +93,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> getUser(@PathVariable("email") @Email String email) {
+	ResponseEntity<Object> getUser(@PathVariable("email") @NotBlank @Email String email) {
 
 		Result<User> result = users.get(email);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
@@ -122,7 +122,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> updateUser(@PathVariable("email") @Email String email, @RequestBody List<Map<String, Object>> updates) {
+	ResponseEntity<Object> updateUser(@PathVariable("email") @NotBlank @Email String email, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<User> result = users.update(email, updates);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
@@ -136,7 +136,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{email}")
-	ResponseEntity<Object> deleteUser(@PathVariable("email") @Email String email) {
+	ResponseEntity<Object> deleteUser(@PathVariable("email") @NotBlank @Email String email) {
 
 		Result<User> result = users.delete(email);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
@@ -151,7 +151,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{email}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> createFriend(@PathVariable("email") @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
+	ResponseEntity<Object> createFriend(@PathVariable("email") @NotBlank @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
 
 		Result<User> result = users.createFriend(email, friend, true);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
@@ -166,7 +166,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{email}/friends/{friendEmail}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> deleteFriend(@PathVariable("email") @Email String email, @PathVariable("friendEmail") @Email String friendEmail) {
+	ResponseEntity<Object> deleteFriend(@PathVariable("email") @NotBlank @Email String email, @PathVariable("friendEmail") @NotBlank @Email String friendEmail) {
 
 		Result<User> result = users.deleteFriend(email, friendEmail, true);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
@@ -184,7 +184,7 @@ public class UserController {
 	 */
 	@GetMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	ResponseEntity<Object> getAssessments(
-			@PathVariable("userId") @NotBlank String userId,
+			@PathVariable("userId") @NotBlank @Email String userId,
 			@RequestParam(name = "page", defaultValue = "0") int page,
 			@RequestParam(name = "size", defaultValue = "20") int size,
 			@RequestParam(name = "sort", defaultValue = "") List<String> sort
@@ -215,7 +215,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> createAssessment(@PathVariable("userId") @NotBlank String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
+	ResponseEntity<Object> createAssessment(@PathVariable("userId") @NotBlank @Email String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForUser(userId, assessment);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
@@ -231,7 +231,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> updateAssessment(@PathVariable("userId") @NotBlank String userId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
+	ResponseEntity<Object> updateAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.update(assessmentId, updates);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
@@ -246,7 +246,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> deleteAssessment(@PathVariable("userId") @NotBlank String userId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
+	ResponseEntity<Object> deleteAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.delete(assessmentId);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());

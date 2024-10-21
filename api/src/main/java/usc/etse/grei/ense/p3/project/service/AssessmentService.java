@@ -150,6 +150,14 @@ public class AssessmentService {
 
 	}
 
+	/**
+	 * Metodo que modifica la información de un comentario existente a partir del usuario
+	 *
+	 * @param userId identificador del usuario
+	 * @param assessmentId identificador del comentario
+	 * @param operations lista de operaciones de modificación
+	 * @return resultado de la modificación
+	 */
 	public Result<Assessment> updateForUser(String userId, String assessmentId, List<Map<String, Object>> operations) {
 
 		Assessment assessment = assessments.findById(assessmentId).orElse(null);
@@ -162,6 +170,14 @@ public class AssessmentService {
 
 	}
 
+	/**
+	 * Metodo que modifica la información de un comentario existente a partir de la película
+	 *
+	 * @param movieId identificador de la película
+	 * @param assessmentId identificador del comentario
+	 * @param operations lista de operaciones de modificación
+	 * @return resultado de la modificación
+	 */
 	public Result<Assessment> updateForMovie(String movieId, String assessmentId, List<Map<String, Object>> operations) {
 
 		Assessment assessment = assessments.findById(assessmentId).orElse(null);
@@ -174,13 +190,13 @@ public class AssessmentService {
 
 	}
 
-		/**
-		 * Metodo que modifica la información de un comentario existente de un usuario
-		 *
-		 * @param assessment comentario
-		 * @param operations lista de operaciones de modificación
-		 * @return resultado de la modificación
-		 */
+	/**
+	 * Metodo que modifica la información de un comentario existente
+	 *
+	 * @param assessment comentario
+	 * @param operations lista de operaciones de modificación
+	 * @return resultado de la modificación
+	 */
 	public Result<Assessment> update(Assessment assessment, List<Map<String, Object>> operations) {
 
 		try {
@@ -207,6 +223,13 @@ public class AssessmentService {
 
 	}
 
+	/**
+	 * Metodo que elimina un comentario de la base de datos a partir del usuario
+	 *
+	 * @param userId identificador del usuario
+	 * @param assessmentId identificador del comentario
+	 * @return resultado de la eliminación
+	 */
 	public Result<Assessment> deleteForUser(String userId, String assessmentId) {
 
 		Assessment assessment = assessments.findById(assessmentId).orElse(null);
@@ -219,6 +242,13 @@ public class AssessmentService {
 
 	}
 
+	/**
+	 * Metodo que elimina un comentario de la base de datos a partir de la película
+	 *
+	 * @param movieId identificador de la película
+	 * @param assessmentId identificador del comentario
+	 * @return resultado de la eliminación
+	 */
 	public Result<Assessment> deleteForMovie(String movieId, String assessmentId) {
 
 		Assessment assessment = assessments.findById(assessmentId).orElse(null);
@@ -232,7 +262,7 @@ public class AssessmentService {
 	}
 
 	/**
-	 * Metodo que elimina un comentario de un usuario de la base de datos
+	 * Metodo que elimina un comentario de la base de datos
 	 *
 	 * @param assessment comentario
 	 * @return resultado de la eliminación

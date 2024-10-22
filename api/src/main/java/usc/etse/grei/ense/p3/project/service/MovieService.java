@@ -199,7 +199,7 @@ public class MovieService {
 			Set<ConstraintViolation<Movie>> violations = validator.validate(filteredMovie, OnUpdate.class);
 
 			if (!violations.isEmpty()) {
-				return new Result<>(null, true, "Invalid cast", 0, Result.Code.BAD_REQUEST);
+				return new Result<>(null, true, "Invalid due to violations", 0, Result.Code.BAD_REQUEST);
 			}
 
 			filteredMovie.setCrew(crewCopy);
@@ -302,7 +302,7 @@ public class MovieService {
 		if (movie.getCast() == null) {
 			movie.setCast(List.of(cast));
 		} else if (movie.getCast().stream().anyMatch(c -> c.getId().equals(cast.getId()))){
-			return new Result<>(null, true, "Person is already in cast", 0, Result.Code.BAD_REQUEST);
+			return new Result<>(null, true, "Person is already in cast", 0, Result.Code.CONFLICT);
 		} else {
 			movie.getCast().add(cast);
 		}
@@ -432,7 +432,7 @@ public class MovieService {
 		if (movie.getCrew() == null) {
 			movie.setCrew(List.of(crew));
 		} else if (movie.getCrew().stream().anyMatch(c -> c.getId().equals(crew.getId()))){
-			return new Result<>(null, true, "Person is already in crew", 0, Result.Code.BAD_REQUEST);
+			return new Result<>(null, true, "Person is already in crew", 0, Result.Code.CONFLICT);
 		} else {
 			movie.getCrew().add(crew);
 		}

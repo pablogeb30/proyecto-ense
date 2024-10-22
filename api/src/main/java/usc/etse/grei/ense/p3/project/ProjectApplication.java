@@ -9,12 +9,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ProjectApplication {
 
-	/**
-	 * Metodo principal que inicia la API
-	 * @param args argumentos de ejecución
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(ProjectApplication.class, args);
-	}
+    /**
+     * Metodo principal que inicia la API
+     *
+     * @param args argumentos de ejecución
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(ProjectApplication.class, args);
+    }
 
 }

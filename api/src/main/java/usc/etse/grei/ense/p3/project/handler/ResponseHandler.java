@@ -15,12 +15,12 @@ public class ResponseHandler {
 	/**
 	 * Metodo que centraliza la creación de respuestas HTTP
 	 *
-	 * @param error presencia o ausencia de error
-	 * @param message mensaje descriptivo
-	 * @param code código numérico
+	 * @param error       presencia o ausencia de error
+	 * @param message     mensaje descriptivo
+	 * @param code        código numérico
 	 * @param responseObj datos que se devuelven en la respuesta
 	 * @param entityModel enlaces a la entidad
-	 * @param status código de estado
+	 * @param status      código de estado
 	 * @return respuesta HTTP
 	 */
 	public static ResponseEntity<Object> generateResponse(boolean error, String message, int code, Object responseObj, EntityModel entityModel, HttpStatus status) {

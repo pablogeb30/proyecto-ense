@@ -12,6 +12,8 @@ public class Cast extends Person {
 	@NotBlank(message = "The character field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	private String character;
 
+	private int relationId;
+
 	public Cast() {
 	}
 
@@ -29,6 +31,15 @@ public class Cast extends Person {
 		return this;
 	}
 
+	public int getRelationId() {
+		return relationId;
+	}
+
+	public Cast setRelationId(int relationId) {
+		this.relationId = relationId;
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -39,7 +50,7 @@ public class Cast extends Person {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(character);
+		return Objects.hash(character, super.hashCode());
 	}
 
 	@Override

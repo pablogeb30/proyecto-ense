@@ -12,7 +12,7 @@ public class Cast extends Person {
 	@NotBlank(message = "The character field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	private String character;
 
-	private int relationId;
+	private Integer relationId;
 
 	public Cast() {
 	}
@@ -31,11 +31,11 @@ public class Cast extends Person {
 		return this;
 	}
 
-	public int getRelationId() {
+	public Integer getRelationId() {
 		return relationId;
 	}
 
-	public Cast setRelationId(int relationId) {
+	public Cast setRelationId(Integer relationId) {
 		this.relationId = relationId;
 		return this;
 	}

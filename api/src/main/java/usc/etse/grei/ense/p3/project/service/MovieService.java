@@ -303,7 +303,7 @@ public class MovieService {
 
 		if (movie.getCast() == null) {
 			movie.setCast(List.of(cast));
-		} else if (movie.getCast().stream().anyMatch(c -> c.getRelationId() == cast.getRelationId())) {
+		} else if (movie.getCast().stream().anyMatch(c -> c.getRelationId().equals(cast.getRelationId()))) {
 			return new Result<>(null, true, "Person is already in cast", 0, Result.Code.CONFLICT);
 		} else {
 			movie.getCast().add(cast);
@@ -319,7 +319,7 @@ public class MovieService {
 	 * Metodo que modifica la información de un actor del reparto de una película
 	 *
 	 * @param id         identificador de la película
-	 * @param relationId identificador
+	 * @param relationId identificador de la relación
 	 * @param operations lista de operaciones de modificación
 	 * @return resultado de la modificación
 	 */
@@ -337,7 +337,7 @@ public class MovieService {
 				return new Result<>(null, true, "Cast not found", 0, Result.Code.NOT_FOUND);
 			}
 
-			Cast cast = movie.getCast().stream().filter(c -> c.getRelationId() == (relationId)).findFirst().orElse(null);
+			Cast cast = movie.getCast().stream().filter(c -> c.getRelationId().equals(relationId)).findFirst().orElse(null);
 
 			if (cast == null) {
 				return new Result<>(null, true, "Cast not found", 0, Result.Code.NOT_FOUND);
@@ -355,7 +355,7 @@ public class MovieService {
 
 			filteredCast.setRelationId(filteredCast.hashCode());
 
-			if (movie.getCast().stream().anyMatch(c -> c.getRelationId() == filteredCast.getRelationId())) {
+			if (movie.getCast().stream().anyMatch(c -> c.getRelationId().equals(filteredCast.getRelationId()))) {
 				return new Result<>(null, true, "Combination person-character is already in cast", 0, Result.Code.CONFLICT);
 			}
 
@@ -393,7 +393,7 @@ public class MovieService {
 			return new Result<>(null, true, "Cast not found", 0, Result.Code.NOT_FOUND);
 		}
 
-		Cast cast = movie.getCast().stream().filter(c -> c.getRelationId() == relationId).findFirst().orElse(null);
+		Cast cast = movie.getCast().stream().filter(c -> c.getRelationId().equals(relationId)).findFirst().orElse(null);
 
 		if (cast == null) {
 			return new Result<>(null, true, "Cast not found", 0, Result.Code.NOT_FOUND);
@@ -457,7 +457,7 @@ public class MovieService {
 	 * Metodo que modifica la información de un trabajador del equipo de una película
 	 *
 	 * @param id         identificador de la película
-	 * @param relationId identificador de la relacion
+	 * @param relationId identificador de la relación
 	 * @param operations lista de operaciones de modificación
 	 * @return resultado de la modificación
 	 */
@@ -516,7 +516,7 @@ public class MovieService {
 	 * Metodo que elimina un trabajador del equipo de una película
 	 *
 	 * @param id         identificador de la película
-	 * @param relationId identificador de la relacion
+	 * @param relationId identificador de la relación
 	 * @return resultado de la eliminación
 	 */
 	public Result<Crew> deleteCrew(String id, Integer relationId) {

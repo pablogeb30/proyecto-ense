@@ -173,7 +173,7 @@ public class MovieService {
 	 * Metodo que modifica la información de una película almacenada
 	 *
 	 * @param id identificador de la pelicula modificada
-	 * @param operations operaciones de modificación
+	 * @param operations lista de operaciones de modificación
 	 * @return resultado de la modificación
 	 */
 	public Result<Movie> update(String id, List<Map<String, Object>> operations) {
@@ -301,6 +301,8 @@ public class MovieService {
 
 		if (movie.getCast() == null) {
 			movie.setCast(List.of(cast));
+		} else if (movie.getCast().stream().anyMatch(c -> c.getId().equals(cast.getId()))){
+			return new Result<>(null, true, "Person is already in cast", 0, Result.Code.BAD_REQUEST);
 		} else {
 			movie.getCast().add(cast);
 		}
@@ -316,7 +318,7 @@ public class MovieService {
 	 *
 	 * @param id identificador de la película
 	 * @param castId identificador del actor
-	 * @param operations operaciones de modificación
+	 * @param operations lista de operaciones de modificación
 	 * @return resultado de la modificación
 	 */
 	public Result<Cast> updateCast(String id, String castId, List<Map<String, Object>> operations) {
@@ -429,6 +431,8 @@ public class MovieService {
 
 		if (movie.getCrew() == null) {
 			movie.setCrew(List.of(crew));
+		} else if (movie.getCrew().stream().anyMatch(c -> c.getId().equals(crew.getId()))){
+			return new Result<>(null, true, "Person is already in crew", 0, Result.Code.BAD_REQUEST);
 		} else {
 			movie.getCrew().add(crew);
 		}
@@ -444,7 +448,7 @@ public class MovieService {
 	 *
 	 * @param id identificador de la película
 	 * @param crewId identificador del trabajador
-	 * @param operations operaciones de modificación
+	 * @param operations lista de operaciones de modificación
 	 * @return resultado de la modificación
 	 */
 	public Result<Crew> updateCrew(String id, String crewId, List<Map<String, Object>> operations) {

@@ -304,7 +304,7 @@ public class MovieService {
 		if (movie.getCast() == null) {
 			movie.setCast(List.of(cast));
 		} else if (movie.getCast().stream().anyMatch(c -> c.getRelationId().equals(cast.getRelationId()))) {
-			return new Result<>(null, true, "Person is already in cast", 0, Result.Code.CONFLICT);
+			return new Result<>(null, true, "Combination person-character is already in cast", 0, Result.Code.CONFLICT);
 		} else {
 			movie.getCast().add(cast);
 		}
@@ -378,7 +378,7 @@ public class MovieService {
 	 * Metodo que elimina un actor del reparto de una película
 	 *
 	 * @param id         identificador de la película
-	 * @param relationId identificador del actor
+	 * @param relationId identificador de la relación
 	 * @return resultado de la eliminación
 	 */
 	public Result<Cast> deleteCast(String id, Integer relationId) {
@@ -442,7 +442,7 @@ public class MovieService {
 		if (movie.getCrew() == null) {
 			movie.setCrew(List.of(crew));
 		} else if (movie.getCrew().stream().anyMatch(c -> c.getRelationId().equals(crew.getRelationId()))) {
-			return new Result<>(null, true, "Person is already in crew", 0, Result.Code.CONFLICT);
+			return new Result<>(null, true, "Combination person-job is already in crew", 0, Result.Code.CONFLICT);
 		} else {
 			movie.getCrew().add(crew);
 		}

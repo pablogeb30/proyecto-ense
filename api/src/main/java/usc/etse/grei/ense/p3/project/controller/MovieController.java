@@ -262,7 +262,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación PATCH /movies/{id}/cast/{castId}
+	 * Metodo que gestiona la operación PATCH /movies/{id}/cast/{relationId}
 	 *
 	 * @param id         identificador de la película
 	 * @param relationId identificador de la relación
@@ -278,7 +278,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación DELETE /movies/{id}/cast/{castId}
+	 * Metodo que gestiona la operación DELETE /movies/{id}/cast/{relationId}
 	 *
 	 * @param id         identificador de la película
 	 * @param relationId identificador de la relación
@@ -308,7 +308,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación PATCH /movies/{id}/crew/{crewId}
+	 * Metodo que gestiona la operación PATCH /movies/{id}/crew/{relationId}
 	 *
 	 * @param id         identificador de la película
 	 * @param relationId identificador de la relación
@@ -324,7 +324,7 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación DELETE /movies/{id}/crew/{crewId}
+	 * Metodo que gestiona la operación DELETE /movies/{id}/crew/{relationId}
 	 *
 	 * @param id         identificador de la película
 	 * @param relationId identificador de la relacion

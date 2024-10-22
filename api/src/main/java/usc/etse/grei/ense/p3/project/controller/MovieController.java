@@ -1,6 +1,7 @@
 package usc.etse.grei.ense.p3.project.controller;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -55,14 +56,14 @@ public class MovieController {
 	/**
 	 * Metodo que gestiona la operación GET /movies
 	 *
-	 * @param page número de página
-	 * @param size número de películas por página
-	 * @param sort criterio de ordenación
-	 * @param keywords criterio de búsqueda por palabras clave
-	 * @param genres criterio de búsqueda por género
+	 * @param page        número de página
+	 * @param size        número de películas por página
+	 * @param sort        criterio de ordenación
+	 * @param keywords    criterio de búsqueda por palabras clave
+	 * @param genres      criterio de búsqueda por género
 	 * @param releaseDate criterio de búsqueda por fecha de estreno
-	 * @param cast criterio de búsqueda por reparto
-	 * @param crew criterio de búsqueda por equipo de trabajo
+	 * @param cast        criterio de búsqueda por reparto
+	 * @param crew        criterio de búsqueda por equipo de trabajo
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -94,7 +95,7 @@ public class MovieController {
 			filterMovie.setKeywords(keywords);
 		}
 
-		Date parsedDate = null;
+		Date parsedDate;
 
 		if (!releaseDate.isBlank()) {
 
@@ -219,7 +220,7 @@ public class MovieController {
 	/**
 	 * Metodo que gestiona la operación PATCH /movies/{id}
 	 *
-	 * @param id identificador de la película
+	 * @param id      identificador de la película
 	 * @param updates lista de operaciones de modificación
 	 * @return respuesta HTTP
 	 */
@@ -248,7 +249,7 @@ public class MovieController {
 	/**
 	 * Metodo que gestiona la operación POST /movies/{id}/cast
 	 *
-	 * @param id identificador de la película
+	 * @param id   identificador de la película
 	 * @param cast actor añadido
 	 * @return respuesta HTTP
 	 */
@@ -261,32 +262,32 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación PATCH /movies/{id}/cast/{castId}
+	 * Metodo que gestiona la operación PATCH /movies/{id}/cast/{relationId}
 	 *
-	 * @param id identificador de la película
-	 * @param castId identificador del actor
-	 * @param updates lista de operaciones de modificación
+	 * @param id         identificador de la película
+	 * @param relationId identificador de la relación
+	 * @param updates    lista de operaciones de modificación
 	 * @return respuesta HTTP
 	 */
-	@PatchMapping(path = "{id}/cast/{castId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> updateCast(@PathVariable("id") @NotBlank String id, @PathVariable("castId") @NotBlank String castId, @RequestBody List<Map<String, Object>> updates) {
+	@PatchMapping(path = "{id}/cast/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> updateCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
-		Result<Cast> result = movies.updateCast(id, castId, updates);
+		Result<Cast> result = movies.updateCast(id, relationId, updates);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	/**
-	 * Metodo que gestiona la operación DELETE /movies/{id}/cast/{castId}
+	 * Metodo que gestiona la operación DELETE /movies/{id}/cast/{relationId}
 	 *
-	 * @param id identificador de la película
-	 * @param castId identificador del actor
+	 * @param id         identificador de la película
+	 * @param relationId identificador de la relación
 	 * @return respuesta HTTP
 	 */
-	@DeleteMapping(path = "{id}/cast/{castId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> deleteCast(@PathVariable("id") @NotBlank String id, @PathVariable("castId") @NotBlank String castId) {
+	@DeleteMapping(path = "{id}/cast/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> deleteCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
-		Result<Cast> result = movies.deleteCast(id, castId);
+		Result<Cast> result = movies.deleteCast(id, relationId);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
@@ -294,7 +295,7 @@ public class MovieController {
 	/**
 	 * Metodo que gestiona la operación POST /movies/{id}/crew
 	 *
-	 * @param id identificador de la película
+	 * @param id   identificador de la película
 	 * @param crew trabajador añadido
 	 * @return respuesta HTTP
 	 */
@@ -307,32 +308,32 @@ public class MovieController {
 	}
 
 	/**
-	 * Metodo que gestiona la operación PATCH /movies/{id}/crew/{crewId}
+	 * Metodo que gestiona la operación PATCH /movies/{id}/crew/{relationId}
 	 *
-	 * @param id identificador de la película
-	 * @param crewId identificador del trabajador
-	 * @param updates lista de operaciones de modificación
+	 * @param id         identificador de la película
+	 * @param relationId identificador de la relación
+	 * @param updates    lista de operaciones de modificación
 	 * @return respuesta HTTP
 	 */
-	@PatchMapping(path = "{id}/crew/{crewId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> updateCrew(@PathVariable("id") @NotBlank String id, @PathVariable("crewId") @NotBlank String crewId, @RequestBody List<Map<String, Object>> updates) {
+	@PatchMapping(path = "{id}/crew/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> updateCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
-		Result<Crew> result = movies.updateCrew(id, crewId, updates);
+		Result<Crew> result = movies.updateCrew(id, relationId, updates);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
 
 	/**
-	 * Metodo que gestiona la operación DELETE /movies/{id}/crew/{crewId}
+	 * Metodo que gestiona la operación DELETE /movies/{id}/crew/{relationId}
 	 *
-	 * @param id identificador de la película
-	 * @param crewId identificador del trabajador
+	 * @param id         identificador de la película
+	 * @param relationId identificador de la relacion
 	 * @return respuesta HTTP
 	 */
-	@DeleteMapping(path = "{id}/crew/{crewId}", produces = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<Object> deleteCrew(@PathVariable("id") @NotBlank String id, @PathVariable("crewId") @NotBlank String crewId) {
+	@DeleteMapping(path = "{id}/crew/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<Object> deleteCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
-		Result<Crew> result = movies.deleteCrew(id, crewId);
+		Result<Crew> result = movies.deleteCrew(id, relationId);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
 
 	}
@@ -341,9 +342,9 @@ public class MovieController {
 	 * Metodo que gestiona la operación GET /movies/{movieId}/assessments
 	 *
 	 * @param movieId identificador de la película
-	 * @param page número de página
-	 * @param size número de comentarios por página
-	 * @param sort criterio de ordenación
+	 * @param page    número de página
+	 * @param size    número de comentarios por página
+	 * @param sort    criterio de ordenación
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -374,7 +375,7 @@ public class MovieController {
 	/**
 	 * Metodo que gestiona la operación POST /movies/{movieId}/assessments
 	 *
-	 * @param movieId identificador de la película
+	 * @param movieId    identificador de la película
 	 * @param assessment comentario añadido
 	 * @return respuesta HTTP
 	 */
@@ -389,9 +390,9 @@ public class MovieController {
 	/**
 	 * Metodo que gestiona la operación PATCH /movies/{movieId}/assessments/{assessmentId}
 	 *
-	 * @param movieId identificador de la película
+	 * @param movieId      identificador de la película
 	 * @param assessmentId identificador del comentario
-	 * @param updates lista de operaciones de modificación
+	 * @param updates      lista de operaciones de modificación
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -405,7 +406,7 @@ public class MovieController {
 	/**
 	 * Metodo que gestiona la operación DELETE /movies/{movieId}/assessments/{assessmentId}
 	 *
-	 * @param movieId identificador de la película
+	 * @param movieId      identificador de la película
 	 * @param assessmentId identificador del comentario
 	 * @return respuesta HTTP
 	 */

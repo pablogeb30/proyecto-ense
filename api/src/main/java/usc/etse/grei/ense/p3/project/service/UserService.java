@@ -41,9 +41,9 @@ public class UserService {
 	/**
 	 * Metodo que obtiene una lista de usuarios utilizando filtrado y ordenación
 	 *
-	 * @param page número de página
-	 * @param size número de usuarios por página
-	 * @param sort criterio de ordenación
+	 * @param page   número de página
+	 * @param size   número de usuarios por página
+	 * @param sort   criterio de ordenación
 	 * @param filter criterio de filtrado por nombre o dirección de correo
 	 * @return resultado de la búsqueda
 	 */
@@ -118,7 +118,7 @@ public class UserService {
 	/**
 	 * Metodo que modifica la información de un usuario existente
 	 *
-	 * @param email correo electrónico del usuario
+	 * @param email      correo electrónico del usuario
 	 * @param operations lista de operaciones de modificación
 	 * @return resultado de la modificación
 	 */
@@ -239,9 +239,9 @@ public class UserService {
 	/**
 	 * Metodo que añade un usuario a la lista de amigos de otro usuario
 	 *
-	 * @param email correo electrónico del usuario actual
+	 * @param email  correo electrónico del usuario actual
 	 * @param friend usuario añadido a la lista de amigos del usuario actual
-	 * @param redo booleano que indica si la inserción se realiza en ambas direcciones
+	 * @param redo   booleano que indica si la inserción se realiza en ambas direcciones
 	 * @return resultado de la inserción
 	 */
 	public Result<User> createFriend(String email, User friend, boolean redo) {
@@ -268,7 +268,7 @@ public class UserService {
 			friends = new ArrayList<>();
 		}
 
-		if (friends.stream().anyMatch(f -> f.getEmail().equals(bdFriend.getEmail()))){
+		if (friends.stream().anyMatch(f -> f.getEmail().equals(bdFriend.getEmail()))) {
 			return new Result<>(null, false, "Friend already added", 0, Result.Code.BAD_REQUEST);
 		}
 
@@ -290,9 +290,9 @@ public class UserService {
 	/**
 	 * Metodo que elimina a un usuario de la lista de amigos de otro usuario
 	 *
-	 * @param email correo electrónico del usuario actual
+	 * @param email       correo electrónico del usuario actual
 	 * @param friendEmail correo electrónico del usuario eliminado de la lista de amigos
-	 * @param redo booleano que indica si la eliminación se realiza en ambas direcciones
+	 * @param redo        booleano que indica si la eliminación se realiza en ambas direcciones
 	 * @return resultado de la eliminación
 	 */
 	public Result<User> deleteFriend(String email, String friendEmail, boolean redo) {
@@ -315,7 +315,7 @@ public class UserService {
 			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
 		}
 
-		if (friends.stream().noneMatch(f -> f.getEmail().equals(friendEmail))){
+		if (friends.stream().noneMatch(f -> f.getEmail().equals(friendEmail))) {
 			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
 		}
 

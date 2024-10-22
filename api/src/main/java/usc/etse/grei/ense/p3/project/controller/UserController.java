@@ -53,11 +53,11 @@ public class UserController {
 	/**
 	 * Metodo que gestiona la operación GET /users
 	 *
-	 * @param page número de página
-	 * @param size número de usuarios por página
-	 * @param sort criterio de ordenación
+	 * @param page  número de página
+	 * @param size  número de usuarios por página
+	 * @param sort  criterio de ordenación
 	 * @param email criterio de búsqueda por correo electrónico
-	 * @param name criterio de búsqueda por nombre
+	 * @param name  criterio de búsqueda por nombre
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -117,7 +117,7 @@ public class UserController {
 	/**
 	 * Metodo que gestiona la operación PATCH /users/{email}
 	 *
-	 * @param email correo electrónico del usuario
+	 * @param email   correo electrónico del usuario
 	 * @param updates lista de operaciones de modificación
 	 * @return respuesta HTTP
 	 */
@@ -146,7 +146,7 @@ public class UserController {
 	/**
 	 * Metodo que gestiona la operación POST /users/{email}/friends
 	 *
-	 * @param email correo electrónico del usuario
+	 * @param email  correo electrónico del usuario
 	 * @param friend usuario que se añade como amigo
 	 * @return respuesta HTTP
 	 */
@@ -161,7 +161,7 @@ public class UserController {
 	/**
 	 * Metodo que gestiona la operación DELETE /users/{email}/friends/{friendEmail}
 	 *
-	 * @param email correo electrónico del usuario
+	 * @param email       correo electrónico del usuario
 	 * @param friendEmail correo electrónico del usuario amigo
 	 * @return respuesta HTTP
 	 */
@@ -177,9 +177,9 @@ public class UserController {
 	 * Metodo que gestiona la operación GET /users/{userId}/assessments
 	 *
 	 * @param userId correo electrónico del usuario
-	 * @param page número de página
-	 * @param size número de comentarios por página
-	 * @param sort criterio de ordenación
+	 * @param page   número de página
+	 * @param size   número de comentarios por página
+	 * @param sort   criterio de ordenación
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -210,7 +210,7 @@ public class UserController {
 	/**
 	 * Metodo que gestiona la operación POST /users/{userId}/assessments
 	 *
-	 * @param userId correo electrónico del usuario
+	 * @param userId     correo electrónico del usuario
 	 * @param assessment comentario añadido
 	 * @return respuesta HTTP
 	 */
@@ -225,9 +225,9 @@ public class UserController {
 	/**
 	 * Metodo que gestiona la operación PATCH /users/{userId}/assessments/{assessmentId}
 	 *
-	 * @param userId correo electrónico del usuario
+	 * @param userId       correo electrónico del usuario
 	 * @param assessmentId identificador del comentario
-	 * @param updates lista de operaciones de modificación
+	 * @param updates      lista de operaciones de modificación
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -241,7 +241,7 @@ public class UserController {
 	/**
 	 * Metodo que gestiona la operación DELETE /users/{userId}/assessments/{assessmentId}
 	 *
-	 * @param userId correo electrónico del usuario
+	 * @param userId       correo electrónico del usuario
 	 * @param assessmentId identificador del comentario
 	 * @return respuesta HTTP
 	 */

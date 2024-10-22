@@ -12,6 +12,8 @@ public class Crew extends Person {
 	@NotBlank(message = "The job field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
 	private String job;
 
+	private Integer relationId;
+
 	public Crew() {
 	}
 
@@ -28,6 +30,15 @@ public class Crew extends Person {
 		return this;
 	}
 
+	public Integer getRelationId() {
+		return relationId;
+	}
+
+	public Crew setRelationId(Integer relationId) {
+		this.relationId = relationId;
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -38,7 +49,7 @@ public class Crew extends Person {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(job);
+		return Objects.hash(job, super.hashCode());
 	}
 
 	@Override

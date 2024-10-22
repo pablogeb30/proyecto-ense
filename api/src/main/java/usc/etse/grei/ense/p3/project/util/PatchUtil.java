@@ -26,10 +26,10 @@ public class PatchUtil {
 	/**
 	 * Metodo que aplica una lista de modificaciones a un objeto utilizando JSONPatch
 	 *
-	 * @param data objeto al que se le aplican las modificaciones
+	 * @param data    objeto al que se le aplican las modificaciones
 	 * @param updates lista de operaciones
+	 * @param <T>     metodo genérico
 	 * @return objeto modificado
-	 * @param <T> metodo genérico
 	 * @throws JsonPatchException excepcion
 	 */
 	@SuppressWarnings("unchecked")

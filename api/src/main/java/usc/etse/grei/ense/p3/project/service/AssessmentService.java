@@ -47,9 +47,9 @@ public class AssessmentService {
 	/**
 	 * Metodo que obtiene una lista de comentarios utilizando filtrado y ordenación
 	 *
-	 * @param page número de página
-	 * @param size número de comentarios por página
-	 * @param sort criterio de ordenación
+	 * @param page   número de página
+	 * @param size   número de comentarios por página
+	 * @param sort   criterio de ordenación
 	 * @param filter criterio de filtrado por usuario o película
 	 * @return resultado de la búsqueda
 	 */
@@ -71,7 +71,7 @@ public class AssessmentService {
 	/**
 	 * Metodo que añade un comentario a la base de datos a partir de la película
 	 *
-	 * @param movieId identificador de la película
+	 * @param movieId    identificador de la película
 	 * @param assessment comentario añadido
 	 * @return resultado de la inserción
 	 */
@@ -121,7 +121,7 @@ public class AssessmentService {
 	/**
 	 * Metodo que añade un comentario a la base de datos a partir del usuario
 	 *
-	 * @param userId identificador del usuario
+	 * @param userId     identificador del usuario
 	 * @param assessment comentario añadido
 	 * @return resultado de la inserción
 	 */
@@ -171,9 +171,9 @@ public class AssessmentService {
 	/**
 	 * Metodo que modifica la información de un comentario existente a partir de la película
 	 *
-	 * @param movieId identificador de la película
+	 * @param movieId      identificador de la película
 	 * @param assessmentId identificador del comentario
-	 * @param operations lista de operaciones de modificación
+	 * @param operations   lista de operaciones de modificación
 	 * @return resultado de la modificación
 	 */
 	public Result<Assessment> updateForMovie(String movieId, String assessmentId, List<Map<String, Object>> operations) {
@@ -191,9 +191,9 @@ public class AssessmentService {
 	/**
 	 * Metodo que modifica la información de un comentario existente a partir del usuario
 	 *
-	 * @param userId identificador del usuario
+	 * @param userId       identificador del usuario
 	 * @param assessmentId identificador del comentario
-	 * @param operations lista de operaciones de modificación
+	 * @param operations   lista de operaciones de modificación
 	 * @return resultado de la modificación
 	 */
 	public Result<Assessment> updateForUser(String userId, String assessmentId, List<Map<String, Object>> operations) {
@@ -244,7 +244,7 @@ public class AssessmentService {
 	/**
 	 * Metodo que elimina un comentario de la base de datos a partir de la película
 	 *
-	 * @param movieId identificador de la película
+	 * @param movieId      identificador de la película
 	 * @param assessmentId identificador del comentario
 	 * @return resultado de la eliminación
 	 */
@@ -263,7 +263,7 @@ public class AssessmentService {
 	/**
 	 * Metodo que elimina un comentario de la base de datos a partir del usuario
 	 *
-	 * @param userId identificador del usuario
+	 * @param userId       identificador del usuario
 	 * @param assessmentId identificador del comentario
 	 * @return resultado de la eliminación
 	 */

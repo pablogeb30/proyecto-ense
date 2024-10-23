@@ -79,6 +79,9 @@ public class UserService {
 			return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
 		}
 
+		result.setPassword(null);
+		result.setRoles(null);
+
 		return new Result<>(result, false, "User data", 0, Result.Code.OK);
 
 	}
@@ -344,6 +347,32 @@ public class UserService {
 		}
 
 		return new Result<>(user, false, "Friend deleted", 0, Result.Code.OK);
+
+	}
+
+	/**
+	 * Metodo que comprueba si dos usuarios son amigos
+	 *
+	 * @param requestEmail correo electrónico del usuario solicitado en la petición
+	 * @param userEmail    correo electrónico del usuario que realiza la petición
+	 * @return resultado de la comprobación
+	 */
+	public Boolean areFriends(String requestEmail, String userEmail) {
+
+		User requestUser = users.findById(requestEmail).orElse(null);
+		User user = users.findById(userEmail).orElse(null);
+
+		if (requestUser == null || user == null) {
+			return false;
+		}
+
+		List<User> friends = user.getFriends();
+
+		if (friends == null) {
+			return false;
+		}
+
+		return friends.stream().anyMatch(f -> f.getEmail().equals(requestEmail));
 
 	}
 

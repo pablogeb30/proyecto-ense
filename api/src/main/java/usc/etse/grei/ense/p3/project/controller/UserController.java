@@ -95,6 +95,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN') or #email == principal or @userService.areFriends(#email, principal)")
 	ResponseEntity<Object> getUser(@PathVariable("email") @NotBlank @Email String email) {
 
 		Result<User> result = users.get(email);
@@ -124,6 +125,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("#email == principal")
 	ResponseEntity<Object> updateUser(@PathVariable("email") @NotBlank @Email String email, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<User> result = users.update(email, updates);
@@ -138,6 +140,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{email}")
+	@PreAuthorize("#email == principal")
 	ResponseEntity<Object> deleteUser(@PathVariable("email") @NotBlank @Email String email) {
 
 		Result<User> result = users.delete(email);
@@ -153,6 +156,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{email}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("#email == principal")
 	ResponseEntity<Object> createFriend(@PathVariable("email") @NotBlank @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
 
 		Result<User> result = users.createFriend(email, friend, true);
@@ -168,6 +172,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{email}/friends/{friendEmail}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("#email == principal")
 	ResponseEntity<Object> deleteFriend(@PathVariable("email") @NotBlank @Email String email, @PathVariable("friendEmail") @NotBlank @Email String friendEmail) {
 
 		Result<User> result = users.deleteFriend(email, friendEmail, true);

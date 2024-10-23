@@ -7,6 +7,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import usc.etse.grei.ense.p3.project.model.Date;
 import usc.etse.grei.ense.p3.project.model.*;
@@ -28,14 +29,16 @@ public class UserService {
 	private final PatchUtil patchUtil;
 	private final AssessmentRepository assessments;
 	private final Validator validator;
+	private final PasswordEncoder encoder;
 
 	@Autowired
-	public UserService(UserRepository users, MongoTemplate mongo, PatchUtil patchUtil, AssessmentRepository assessments, Validator validator) {
+	public UserService(UserRepository users, MongoTemplate mongo, PatchUtil patchUtil, AssessmentRepository assessments, Validator validator, PasswordEncoder encoder) {
 		this.users = users;
 		this.mongo = mongo;
 		this.patchUtil = patchUtil;
 		this.assessments = assessments;
 		this.validator = validator;
+		this.encoder = encoder;
 	}
 
 	/**
@@ -104,6 +107,12 @@ public class UserService {
 				return new Result<>(null, true, "Invalid birthday", 0, Result.Code.BAD_REQUEST);
 			}
 
+			user.setPassword(encoder.encode(user.getPassword()));
+
+			ArrayList<String> roles = new ArrayList<>();
+			roles.add("ROLE_USER");
+			user.setRoles(roles);
+
 			User newUser = users.insert(user);
 			return new Result<>(newUser, false, "User created", 0, Result.Code.CREATED);
 
@@ -132,7 +141,7 @@ public class UserService {
 				return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
 			}
 
-			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday") || ((String) op.get("path")).startsWith("/friends")));
+			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday") || ((String) op.get("path")).startsWith("/friends") || ((String) op.get("path")).startsWith("/roles")));
 
 			User filteredUser = patchUtil.patch(originalUser, operations);
 			List<User> friendsCopy = filteredUser.getFriends();
@@ -145,6 +154,11 @@ public class UserService {
 			}
 
 			filteredUser.setFriends(friendsCopy);
+
+			if (!filteredUser.getPassword().equals(originalUser.getPassword())) {
+				filteredUser.setPassword(encoder.encode(filteredUser.getPassword()));
+			}
+
 			User updatedUser = users.save(filteredUser);
 
 			ExampleMatcher matcher = ExampleMatcher.matching();

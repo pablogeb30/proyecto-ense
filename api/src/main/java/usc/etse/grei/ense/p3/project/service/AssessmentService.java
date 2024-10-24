@@ -3,10 +3,7 @@ package usc.etse.grei.ense.p3.project.service;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -53,7 +50,7 @@ public class AssessmentService {
 	 * @param filter criterio de filtrado por usuario o película
 	 * @return resultado de la búsqueda
 	 */
-	public Result<List<Assessment>> get(int page, int size, Sort sort, Example<Assessment> filter) {
+	public Result<Page<Assessment>> get(int page, int size, Sort sort, Example<Assessment> filter) {
 
 		Pageable request = PageRequest.of(page, size, sort);
 
@@ -63,8 +60,11 @@ public class AssessmentService {
 		query.fields().include("_id", "rating", "user", "movie", "comment");
 
 		List<Assessment> result = mongo.find(query, Assessment.class);
+		long totalElements = mongo.count(Query.query(criteria), Assessment.class);
 
-		return new Result<>(result, false, "Assessments data", 0, Result.Code.OK);
+		Page<Assessment> pageResult = new PageImpl<>(result, request, totalElements);
+
+		return new Result<>(pageResult, false, "Assessments data", 0, Result.Code.OK);
 
 	}
 

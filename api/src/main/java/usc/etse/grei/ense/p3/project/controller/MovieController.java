@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,20 +37,6 @@ public class MovieController {
 	public MovieController(MovieService movies, AssessmentService assessments) {
 		this.movies = movies;
 		this.assessments = assessments;
-	}
-
-	/**
-	 * Metodo que devuelve un objeto EntityModel que encapsula un objeto Movie
-	 *
-	 * @return objeto EntityModel
-	 */
-	private EntityModel<Movie> getEntityModel() {
-
-		Movie movie = new Movie();
-		EntityModel<Movie> entityModel = EntityModel.of(movie);
-
-		return entityModel;
-
 	}
 
 	/**
@@ -109,7 +95,7 @@ public class MovieController {
 
 			} catch (Exception e) {
 
-				return ResponseHandler.generateResponse(true, e.getMessage(), 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+				return ResponseHandler.generateResponse(true, e.getMessage(), 0, null, new ArrayList<>(), HttpStatus.BAD_REQUEST);
 
 			}
 
@@ -126,7 +112,7 @@ public class MovieController {
 				String[] parts = castString.split("-", 3);
 
 				if (parts.length != 3) {
-					return ResponseHandler.generateResponse(true, "Invalid cast", 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+					return ResponseHandler.generateResponse(true, "Invalid cast", 0, null, new ArrayList<>(), HttpStatus.BAD_REQUEST);
 				}
 
 				if (!parts[0].equals("*")) {
@@ -158,7 +144,7 @@ public class MovieController {
 				String[] parts = crewString.split("-", 3);
 
 				if (parts.length != 3) {
-					return ResponseHandler.generateResponse(true, "Invalid crew", 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+					return ResponseHandler.generateResponse(true, "Invalid crew", 0, null, new ArrayList<>(), HttpStatus.BAD_REQUEST);
 				}
 
 				if (!parts[0].equals("*")) {
@@ -184,8 +170,8 @@ public class MovieController {
 				matcher
 		);
 
-		Result<List<Movie>> result = movies.get(page, size, Sort.by(criteria), filter, castList, crewList);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		Result<Page<Movie>> result = movies.get(page, size, Sort.by(criteria), filter, castList, crewList);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -199,7 +185,7 @@ public class MovieController {
 	ResponseEntity<Object> getMovie(@PathVariable("id") String id) {
 
 		Result<Movie> result = movies.get(id);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -213,7 +199,7 @@ public class MovieController {
 	ResponseEntity<Object> createMovie(@Validated(OnCreate.class) @RequestBody Movie movie) {
 
 		Result<Movie> result = movies.create(movie);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -228,7 +214,7 @@ public class MovieController {
 	ResponseEntity<Object> updateMovie(@PathVariable("id") @NotBlank String id, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Movie> result = movies.update(id, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -242,7 +228,7 @@ public class MovieController {
 	ResponseEntity<Object> deleteMovie(@PathVariable("id") @NotBlank String id) {
 
 		Result<Movie> result = movies.delete(id);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -257,7 +243,7 @@ public class MovieController {
 	ResponseEntity<Object> createCast(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Cast cast) {
 
 		Result<Cast> result = movies.createCast(id, cast);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -273,7 +259,7 @@ public class MovieController {
 	ResponseEntity<Object> updateCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Cast> result = movies.updateCast(id, relationId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -288,7 +274,7 @@ public class MovieController {
 	ResponseEntity<Object> deleteCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
 		Result<Cast> result = movies.deleteCast(id, relationId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -303,7 +289,7 @@ public class MovieController {
 	ResponseEntity<Object> createCrew(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Crew crew) {
 
 		Result<Crew> result = movies.createCrew(id, crew);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -319,7 +305,7 @@ public class MovieController {
 	ResponseEntity<Object> updateCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Crew> result = movies.updateCrew(id, relationId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -334,7 +320,7 @@ public class MovieController {
 	ResponseEntity<Object> deleteCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
 		Result<Crew> result = movies.deleteCrew(id, relationId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -367,8 +353,8 @@ public class MovieController {
 				matcher
 		);
 
-		Result<List<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		Result<Page<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -383,7 +369,7 @@ public class MovieController {
 	ResponseEntity<Object> createAssessment(@PathVariable("movieId") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForMovie(movieId, assessment);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -399,7 +385,7 @@ public class MovieController {
 	ResponseEntity<Object> updateAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForMovie(movieId, assessmentId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -414,7 +400,7 @@ public class MovieController {
 	ResponseEntity<Object> deleteAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForMovie(movieId, assessmentId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 

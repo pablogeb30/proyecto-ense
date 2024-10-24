@@ -1,10 +1,12 @@
 package usc.etse.grei.ense.p3.project.handler;
 
-import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,11 +21,11 @@ public class ResponseHandler {
 	 * @param message     mensaje descriptivo
 	 * @param code        código numérico
 	 * @param responseObj datos que se devuelven en la respuesta
-	 * @param entityModel enlaces a la entidad
+	 * @param links       enlaces HATEOAS
 	 * @param status      código de estado
 	 * @return respuesta HTTP
 	 */
-	public static ResponseEntity<Object> generateResponse(boolean error, String message, int code, Object responseObj, EntityModel entityModel, HttpStatus status) {
+	public static ResponseEntity<Object> generateResponse(boolean error, String message, int code, Object responseObj, List<Link> links, HttpStatus status) {
 
 		Map<String, Object> map = new HashMap<>();
 
@@ -31,9 +33,14 @@ public class ResponseHandler {
 		map.put("code", code);
 		map.put("message", message);
 		map.put("data", responseObj);
-		map.put("_links", entityModel.getLinks());
 
-		return new ResponseEntity<>(map, status);
+		HttpHeaders headers = new HttpHeaders();
+
+		for (Link link : links) {
+			headers.add(HttpHeaders.LINK, link.toString());
+		}
+
+		return new ResponseEntity<>(map, headers, status);
 
 	}
 

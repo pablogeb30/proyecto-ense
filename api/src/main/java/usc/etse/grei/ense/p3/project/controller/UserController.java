@@ -3,10 +3,11 @@ package usc.etse.grei.ense.p3.project.controller;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,8 +19,12 @@ import usc.etse.grei.ense.p3.project.service.AssessmentService;
 import usc.etse.grei.ense.p3.project.service.UserService;
 import usc.etse.grei.ense.p3.project.util.SortUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Controlador de las operaciones sobre usuarios
@@ -30,11 +35,13 @@ public class UserController {
 
 	private final UserService users;
 	private final AssessmentService assessments;
+	private final LinkRelationProvider relationProvider;
 
 	@Autowired
-	public UserController(UserService users, AssessmentService assessments) {
+	public UserController(UserService users, AssessmentService assessments, LinkRelationProvider relationProvider) {
 		this.users = users;
 		this.assessments = assessments;
+		this.relationProvider = relationProvider;
 	}
 
 	/**
@@ -83,8 +90,31 @@ public class UserController {
 				matcher
 		);
 
-		Result<List<User>> result = users.get(page, size, Sort.by(criteria), filter);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		Result<Page<User>> result = users.get(page, size, Sort.by(criteria), filter);
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Page<User> users = result.getResult();
+			Pageable metadata = users.getPageable();
+
+			Link self = linkTo(methodOn(UserController.class).getUsers(page, size, sort, email, name)).withSelfRel();
+			Link first = linkTo(methodOn(UserController.class).getUsers(metadata.first().getPageNumber(), size, sort, email, name)).withRel(IanaLinkRelations.FIRST);
+			Link last = linkTo(methodOn(UserController.class).getUsers(users.getTotalPages() - 1, size, sort, email, name)).withRel(IanaLinkRelations.LAST);
+			Link next = linkTo(methodOn(UserController.class).getUsers(metadata.next().getPageNumber(), size, sort, email, name)).withRel(IanaLinkRelations.NEXT);
+			Link previous = linkTo(methodOn(UserController.class).getUsers(metadata.previousOrFirst().getPageNumber(), size, sort, email, name)).withRel(IanaLinkRelations.PREVIOUS);
+			Link one = linkTo(methodOn(UserController.class).getUser(null)).withRel(relationProvider.getItemResourceRelFor(User.class));
+
+			links.add(self);
+			links.add(first);
+			links.add(last);
+			links.add(next);
+			links.add(previous);
+			links.add(one);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toList(), links, result.getStatus());
 
 	}
 
@@ -99,7 +129,19 @@ public class UserController {
 	ResponseEntity<Object> getUser(@PathVariable("email") @NotBlank @Email String email) {
 
 		Result<User> result = users.get(email);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(UserController.class).getUser(email)).withSelfRel();
+			Link all = linkTo(UserController.class).withRel(relationProvider.getCollectionResourceRelFor(User.class));
+
+			links.add(self);
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -113,7 +155,19 @@ public class UserController {
 	ResponseEntity<Object> createUser(@Validated(OnCreate.class) @RequestBody User user) {
 
 		Result<User> result = users.create(user);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(UserController.class).getUser(result.getResult().getEmail())).withSelfRel();
+			Link all = linkTo(UserController.class).withRel(relationProvider.getCollectionResourceRelFor(User.class));
+
+			links.add(self);
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -129,7 +183,19 @@ public class UserController {
 	ResponseEntity<Object> updateUser(@PathVariable("email") @NotBlank @Email String email, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<User> result = users.update(email, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(UserController.class).getUser(result.getResult().getEmail())).withSelfRel();
+			Link all = linkTo(UserController.class).withRel(relationProvider.getCollectionResourceRelFor(User.class));
+
+			links.add(self);
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -144,7 +210,17 @@ public class UserController {
 	ResponseEntity<Object> deleteUser(@PathVariable("email") @NotBlank @Email String email) {
 
 		Result<User> result = users.delete(email);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link all = linkTo(UserController.class).withRel(relationProvider.getCollectionResourceRelFor(User.class));
+
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -160,7 +236,7 @@ public class UserController {
 	ResponseEntity<Object> createFriend(@PathVariable("email") @NotBlank @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
 
 		Result<User> result = users.createFriend(email, friend, true);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -176,7 +252,7 @@ public class UserController {
 	ResponseEntity<Object> deleteFriend(@PathVariable("email") @NotBlank @Email String email, @PathVariable("friendEmail") @NotBlank @Email String friendEmail) {
 
 		Result<User> result = users.deleteFriend(email, friendEmail, true);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -209,8 +285,8 @@ public class UserController {
 				matcher
 		);
 
-		Result<List<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		Result<Page<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -225,7 +301,7 @@ public class UserController {
 	ResponseEntity<Object> createAssessment(@PathVariable("userId") @NotBlank @Email String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForUser(userId, assessment);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -241,7 +317,7 @@ public class UserController {
 	ResponseEntity<Object> updateAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForUser(userId, assessmentId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 
@@ -256,7 +332,7 @@ public class UserController {
 	ResponseEntity<Object> deleteAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForUser(userId, assessmentId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}
 

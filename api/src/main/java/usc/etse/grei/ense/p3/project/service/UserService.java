@@ -50,7 +50,7 @@ public class UserService {
 	 * @param filter criterio de filtrado por nombre o dirección de correo
 	 * @return resultado de la búsqueda
 	 */
-	public Result<List<User>> get(int page, int size, Sort sort, Example<User> filter) {
+	public Result<Page<User>> get(int page, int size, Sort sort, Example<User> filter) {
 
 		Pageable request = PageRequest.of(page, size, sort);
 
@@ -58,10 +58,14 @@ public class UserService {
 
 		Query query = Query.query(criteria).with(request);
 		query.fields().include("name", "country", "birthday", "picture");
+		query.fields().exclude("password", "roles");
 
 		List<User> result = mongo.find(query, User.class);
+		long totalElements = mongo.count(Query.query(criteria), User.class);
 
-		return new Result<>(result, false, "Users data", 0, Result.Code.OK);
+		Page<User> pageResult = new PageImpl<>(result, request, totalElements);
+
+		return new Result<>(pageResult, false, "Users data", 0, Result.Code.OK);
 
 	}
 

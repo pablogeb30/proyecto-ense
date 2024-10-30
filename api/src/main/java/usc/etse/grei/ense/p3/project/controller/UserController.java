@@ -45,20 +45,6 @@ public class UserController {
 	}
 
 	/**
-	 * Metodo que devuelve un objeto EntityModel que encapsula un objeto User
-	 *
-	 * @return objeto EntityModel
-	 */
-	private EntityModel<User> getEntityModel() {
-
-		User user = new User();
-		EntityModel<User> entityModel = EntityModel.of(user);
-
-		return entityModel;
-
-	}
-
-	/**
 	 * Metodo que gestiona la operación GET /users
 	 *
 	 * @param page  número de página

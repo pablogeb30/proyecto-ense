@@ -252,6 +252,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN') or #userId == principal or @userService.areFriends(#userId, principal)")
 	ResponseEntity<Object> getAssessments(
 			@PathVariable("userId") @NotBlank @Email String userId,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -284,6 +285,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("#userId == principal")
 	ResponseEntity<Object> createAssessment(@PathVariable("userId") @NotBlank @Email String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForUser(userId, assessment);
@@ -300,6 +302,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("#userId == principal")
 	ResponseEntity<Object> updateAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForUser(userId, assessmentId, updates);
@@ -315,6 +318,7 @@ public class UserController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN') or #userId == principal")
 	ResponseEntity<Object> deleteAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForUser(userId, assessmentId);

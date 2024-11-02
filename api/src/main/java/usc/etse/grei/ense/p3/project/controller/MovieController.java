@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import usc.etse.grei.ense.p3.project.handler.ResponseHandler;
@@ -334,6 +335,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('USER')")
 	ResponseEntity<Object> getAssessments(
 			@PathVariable("movieId") @NotBlank String movieId,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -366,6 +368,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("#assessment.user != null and #assessment.user.email != null and #assessment.user.email == principal")
 	ResponseEntity<Object> createAssessment(@PathVariable("movieId") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForMovie(movieId, assessment);
@@ -382,6 +385,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("@assessmentService.isAssessmentOwner(#assessmentId, principal)")
 	ResponseEntity<Object> updateAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForMovie(movieId, assessmentId, updates);
@@ -397,6 +401,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN') or @assessmentService.isAssessmentOwner(#assessmentId, principal)")
 	ResponseEntity<Object> deleteAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForMovie(movieId, assessmentId);

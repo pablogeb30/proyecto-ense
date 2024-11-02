@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import usc.etse.grei.ense.p3.project.model.User;
 import usc.etse.grei.ense.p3.project.repository.UserRepository;
 
+/**
+ * Servicio que implementa la lógica de negocio para la autenticación
+ */
 @Service
 public class AuthenticationService implements UserDetailsService {
 
@@ -19,6 +22,13 @@ public class AuthenticationService implements UserDetailsService {
 		this.users = users;
 	}
 
+	/**
+	 * Metodo que obtiene un usuario con los detalles de seguridad para autenticación y autorización
+	 *
+	 * @param username nombre del usuario
+	 * @return detalles de seguridad del usuario
+	 * @throws UsernameNotFoundException excepcion
+	 */
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 

@@ -27,6 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Clase de configuración de seguridad
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -39,6 +42,11 @@ public class SecurityConfiguration {
 		this.auth = auth;
 	}
 
+	/**
+	 * Metodo que crea un AuthenticationManager para autenticar a los usuarios
+	 *
+	 * @return autenticador de usuarios
+	 */
 	@Bean
 	public AuthenticationManager authManager() {
 
@@ -50,6 +58,14 @@ public class SecurityConfiguration {
 
 	}
 
+	/**
+	 * Metodo que configura la cadena de filtros de seguridad para las solicitudes HTTP
+	 *
+	 * @param http configuración de la seguridad HTTP
+	 * @param authManager autenticador de usuarios
+	 * @return filtros de seguridad HTTP
+	 * @throws Exception excepcion
+	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
 
@@ -64,11 +80,21 @@ public class SecurityConfiguration {
 
 	}
 
+	/**
+	 * Metodo que define el algoritmo de hashing para las contraseñas de los usurios
+	 *
+	 * @return algoritmo de hashing
+	 */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
+	/**
+	 * Metodo que define la jerarquía de roles de la aplicación
+	 *
+	 * @return jerarquía de roles
+	 */
 	@Bean
 	public RoleHierarchy roleHierarchy() {
 
@@ -82,6 +108,11 @@ public class SecurityConfiguration {
 
 	}
 
+	/**
+	 * Metodo que proporciona una clave de firma para los tokens
+	 *
+	 * @return clave de firma
+	 */
 	@Bean
 	public Key tokenSignKey() {
 		return SecurityConfiguration.key;

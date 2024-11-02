@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.security.Key;
 import java.util.List;
 
+/**
+ * Filtro de autorización de usuarios
+ */
 public class AuthorizationFilter extends BasicAuthenticationFilter {
 
 	private final Key key;
@@ -27,6 +30,15 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 		this.key = key;
 	}
 
+	/**
+	 * Metodo que verifica si una solicitud contiene un token y configura la autenticación del usuario
+	 *
+	 * @param request solicitud HTTP
+	 * @param response respuesta HTTP
+	 * @param chain filtro de la cadena de seguridad
+	 * @throws IOException excepcion
+	 * @throws ServletException excepcion
+	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
@@ -53,6 +65,13 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 
 	}
 
+	/**
+	 * Metodo que valida el token y extrae la información de autenticación del usuario
+	 *
+	 * @param token token validado
+	 * @return autenticación del usuario
+	 * @throws ExpiredJwtException excepcion
+	 */
 	private UsernamePasswordAuthenticationToken getAuthentication(String token) throws ExpiredJwtException {
 
 		Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token.replace("Bearer", "").trim()).getBody();

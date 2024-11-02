@@ -273,7 +273,28 @@ public class UserController {
 		);
 
 		Result<Page<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Page<Assessment> assesments = result.getResult();
+			Pageable metadata = assesments.getPageable();
+
+			Link user = linkTo(methodOn(UserController.class).getUser(userId)).withRel("user");
+			Link first = linkTo(methodOn(UserController.class).getAssessments(userId, metadata.first().getPageNumber(), size, sort)).withRel(IanaLinkRelations.FIRST);
+			Link last = linkTo(methodOn(UserController.class).getAssessments(userId, assesments.getTotalPages() - 1, size, sort)).withRel(IanaLinkRelations.LAST);
+			Link next = linkTo(methodOn(UserController.class).getAssessments(userId, metadata.next().getPageNumber(), size, sort)).withRel(IanaLinkRelations.NEXT);
+			Link previous = linkTo(methodOn(UserController.class).getAssessments(userId, metadata.previousOrFirst().getPageNumber(), size, sort)).withRel(IanaLinkRelations.PREVIOUS);
+
+			links.add(user);
+			links.add(first);
+			links.add(last);
+			links.add(next);
+			links.add(previous);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -289,7 +310,19 @@ public class UserController {
 	ResponseEntity<Object> createAssessment(@PathVariable("userId") @NotBlank @Email String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForUser(userId, assessment);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link movie = linkTo(methodOn(MovieController.class).getMovie(result.getResult().getMovie().getId())).withRel("movie");
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+
+			links.add(movie);
+			links.add(movieAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -306,7 +339,21 @@ public class UserController {
 	ResponseEntity<Object> updateAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForUser(userId, assessmentId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(UserController.class).updateAssessment(userId, assessmentId, updates)).withSelfRel();
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+			Link userAssessments = linkTo(methodOn(UserController.class).getAssessments(result.getResult().getUser().getEmail(), 0, 20, new ArrayList<>())).withRel("userAssessments");
+
+			links.add(self);
+			links.add(movieAssessments);
+			links.add(userAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -322,7 +369,19 @@ public class UserController {
 	ResponseEntity<Object> deleteAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForUser(userId, assessmentId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+			Link userAssessments = linkTo(methodOn(UserController.class).getAssessments(result.getResult().getUser().getEmail(), 0, 20, new ArrayList<>())).withRel("userAssessments");
+
+			links.add(movieAssessments);
+			links.add(userAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 

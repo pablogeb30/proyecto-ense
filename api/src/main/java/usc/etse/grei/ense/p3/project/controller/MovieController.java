@@ -3,10 +3,9 @@ package usc.etse.grei.ense.p3.project.controller;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +22,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Controlador de las operaciones sobre películas
@@ -356,7 +358,28 @@ public class MovieController {
 		);
 
 		Result<Page<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Page<Assessment> assesments = result.getResult();
+			Pageable metadata = assesments.getPageable();
+
+			Link movie = linkTo(methodOn(MovieController.class).getMovie(movieId)).withRel("movie");
+			Link first = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.first().getPageNumber(), size, sort)).withRel(IanaLinkRelations.FIRST);
+			Link last = linkTo(methodOn(MovieController.class).getAssessments(movieId, assesments.getTotalPages() - 1, size, sort)).withRel(IanaLinkRelations.LAST);
+			Link next = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.next().getPageNumber(), size, sort)).withRel(IanaLinkRelations.NEXT);
+			Link previous = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.previousOrFirst().getPageNumber(), size, sort)).withRel(IanaLinkRelations.PREVIOUS);
+
+			links.add(movie);
+			links.add(first);
+			links.add(last);
+			links.add(next);
+			links.add(previous);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), links, result.getStatus());
 
 	}
 
@@ -372,7 +395,19 @@ public class MovieController {
 	ResponseEntity<Object> createAssessment(@PathVariable("movieId") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForMovie(movieId, assessment);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link movie = linkTo(methodOn(MovieController.class).getMovie(result.getResult().getMovie().getId())).withRel("movie");
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+
+			links.add(movie);
+			links.add(movieAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -389,7 +424,21 @@ public class MovieController {
 	ResponseEntity<Object> updateAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForMovie(movieId, assessmentId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).updateAssessment(movieId, assessmentId, updates)).withSelfRel();
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+			Link userAssessments = linkTo(methodOn(UserController.class).getAssessments(result.getResult().getUser().getEmail(), 0, 20, new ArrayList<>())).withRel("userAssessments");
+
+			links.add(self);
+			links.add(movieAssessments);
+			links.add(userAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -405,7 +454,19 @@ public class MovieController {
 	ResponseEntity<Object> deleteAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForMovie(movieId, assessmentId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+			Link userAssessments = linkTo(methodOn(UserController.class).getAssessments(result.getResult().getUser().getEmail(), 0, 20, new ArrayList<>())).withRel("userAssessments");
+
+			links.add(movieAssessments);
+			links.add(userAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 

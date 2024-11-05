@@ -535,7 +535,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
-	@PreAuthorize("#assessment.user != null and #assessment.user.email != null and #assessment.user.email == principal")
+	@PreAuthorize("#assessment != null and #assessment.user != null and #assessment.user.email != null and #assessment.user.email == principal")
 	ResponseEntity<Object> createAssessment(@PathVariable("movieId") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForMovie(movieId, assessment);

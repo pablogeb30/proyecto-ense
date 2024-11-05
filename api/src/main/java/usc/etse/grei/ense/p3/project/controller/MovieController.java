@@ -317,10 +317,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{id}/cast", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> createCast(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Cast cast) {
 
 		Result<Cast> result = movies.createCast(id, cast);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -333,10 +345,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{id}/cast/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> updateCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Cast> result = movies.updateCast(id, relationId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -348,10 +372,21 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{id}/cast/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> deleteCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
 		Result<Cast> result = movies.deleteCast(id, relationId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -363,10 +398,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{id}/crew", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> createCrew(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Crew crew) {
 
 		Result<Crew> result = movies.createCrew(id, crew);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -379,10 +426,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{id}/crew/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> updateCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Crew> result = movies.updateCrew(id, relationId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -394,10 +453,21 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{id}/crew/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> deleteCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
 		Result<Crew> result = movies.deleteCrew(id, relationId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 

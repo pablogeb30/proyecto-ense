@@ -56,6 +56,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('USER')")
 	ResponseEntity<Object> getMovies(
 			@RequestParam(name = "page", required = false, defaultValue = "0") int page,
 			@RequestParam(name = "size", required = false, defaultValue = "20") int size,
@@ -185,6 +186,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('USER')")
 	ResponseEntity<Object> getMovie(@PathVariable("id") String id) {
 
 		Result<Movie> result = movies.get(id);
@@ -199,6 +201,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> createMovie(@Validated(OnCreate.class) @RequestBody Movie movie) {
 
 		Result<Movie> result = movies.create(movie);
@@ -214,6 +217,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> updateMovie(@PathVariable("id") @NotBlank String id, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Movie> result = movies.update(id, updates);
@@ -228,6 +232,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> deleteMovie(@PathVariable("id") @NotBlank String id) {
 
 		Result<Movie> result = movies.delete(id);

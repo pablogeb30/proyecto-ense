@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import usc.etse.grei.ense.p3.project.handler.ResponseHandler;
 import usc.etse.grei.ense.p3.project.model.*;
 import usc.etse.grei.ense.p3.project.service.AssessmentService;
@@ -35,11 +36,13 @@ public class MovieController {
 
 	private final MovieService movies;
 	private final AssessmentService assessments;
+	private final LinkRelationProvider relationProvider;
 
 	@Autowired
-	public MovieController(MovieService movies, AssessmentService assessments) {
+	public MovieController(MovieService movies, AssessmentService assessments, LinkRelationProvider relationProvider) {
 		this.movies = movies;
 		this.assessments = assessments;
+		this.relationProvider = relationProvider;
 	}
 
 	/**
@@ -175,7 +178,30 @@ public class MovieController {
 		);
 
 		Result<Page<Movie>> result = movies.get(page, size, Sort.by(criteria), filter, castList, crewList);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Page<Movie> movies = result.getResult();
+			Pageable metadata = movies.getPageable();
+
+			Link self = linkTo(methodOn(MovieController.class).getMovies(page, size, sort, keywords, genres, releaseDate, cast, crew)).withSelfRel();
+			Link first = linkTo(methodOn(MovieController.class).getMovies(metadata.first().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.FIRST);
+			Link next = linkTo(methodOn(MovieController.class).getMovies(metadata.next().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.NEXT);
+			Link previous = linkTo(methodOn(MovieController.class).getMovies(metadata.previousOrFirst().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.PREVIOUS);
+			Link last = linkTo(methodOn(MovieController.class).getMovies(movies.getTotalPages() - 1, size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.LAST);
+			Link resource = linkTo(methodOn(MovieController.class).getMovie(null)).withRel(relationProvider.getItemResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(first);
+			links.add(next);
+			links.add(previous);
+			links.add(last);
+			links.add(resource);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), links, result.getStatus());
 
 	}
 
@@ -190,7 +216,17 @@ public class MovieController {
 	ResponseEntity<Object> getMovie(@PathVariable("id") String id) {
 
 		Result<Movie> result = movies.get(id);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -205,7 +241,18 @@ public class MovieController {
 	ResponseEntity<Object> createMovie(@Validated(OnCreate.class) @RequestBody Movie movie) {
 
 		Result<Movie> result = movies.create(movie);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(result.getResult().getId())).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -221,7 +268,19 @@ public class MovieController {
 	ResponseEntity<Object> updateMovie(@PathVariable("id") @NotBlank String id, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Movie> result = movies.update(id, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(result.getResult().getId())).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -236,7 +295,17 @@ public class MovieController {
 	ResponseEntity<Object> deleteMovie(@PathVariable("id") @NotBlank String id) {
 
 		Result<Movie> result = movies.delete(id);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 

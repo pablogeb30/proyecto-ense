@@ -3,15 +3,16 @@ package usc.etse.grei.ense.p3.project.controller;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.data.domain.*;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import usc.etse.grei.ense.p3.project.handler.ResponseHandler;
 import usc.etse.grei.ense.p3.project.model.*;
 import usc.etse.grei.ense.p3.project.service.AssessmentService;
@@ -23,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 /**
  * Controlador de las operaciones sobre películas
  */
@@ -32,25 +36,13 @@ public class MovieController {
 
 	private final MovieService movies;
 	private final AssessmentService assessments;
+	private final LinkRelationProvider relationProvider;
 
 	@Autowired
-	public MovieController(MovieService movies, AssessmentService assessments) {
+	public MovieController(MovieService movies, AssessmentService assessments, LinkRelationProvider relationProvider) {
 		this.movies = movies;
 		this.assessments = assessments;
-	}
-
-	/**
-	 * Metodo que devuelve un objeto EntityModel que encapsula un objeto Movie
-	 *
-	 * @return objeto EntityModel
-	 */
-	private EntityModel<Movie> getEntityModel() {
-
-		Movie movie = new Movie();
-		EntityModel<Movie> entityModel = EntityModel.of(movie);
-
-		return entityModel;
-
+		this.relationProvider = relationProvider;
 	}
 
 	/**
@@ -67,6 +59,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('USER')")
 	ResponseEntity<Object> getMovies(
 			@RequestParam(name = "page", required = false, defaultValue = "0") int page,
 			@RequestParam(name = "size", required = false, defaultValue = "20") int size,
@@ -109,7 +102,7 @@ public class MovieController {
 
 			} catch (Exception e) {
 
-				return ResponseHandler.generateResponse(true, e.getMessage(), 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+				return ResponseHandler.generateResponse(true, e.getMessage(), 0, null, new ArrayList<>(), HttpStatus.BAD_REQUEST);
 
 			}
 
@@ -126,7 +119,7 @@ public class MovieController {
 				String[] parts = castString.split("-", 3);
 
 				if (parts.length != 3) {
-					return ResponseHandler.generateResponse(true, "Invalid cast", 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+					return ResponseHandler.generateResponse(true, "Invalid cast", 0, null, new ArrayList<>(), HttpStatus.BAD_REQUEST);
 				}
 
 				if (!parts[0].equals("*")) {
@@ -158,7 +151,7 @@ public class MovieController {
 				String[] parts = crewString.split("-", 3);
 
 				if (parts.length != 3) {
-					return ResponseHandler.generateResponse(true, "Invalid crew", 0, null, getEntityModel(), HttpStatus.BAD_REQUEST);
+					return ResponseHandler.generateResponse(true, "Invalid crew", 0, null, new ArrayList<>(), HttpStatus.BAD_REQUEST);
 				}
 
 				if (!parts[0].equals("*")) {
@@ -184,8 +177,31 @@ public class MovieController {
 				matcher
 		);
 
-		Result<List<Movie>> result = movies.get(page, size, Sort.by(criteria), filter, castList, crewList);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		Result<Page<Movie>> result = movies.get(page, size, Sort.by(criteria), filter, castList, crewList);
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Page<Movie> movies = result.getResult();
+			Pageable metadata = movies.getPageable();
+
+			Link self = linkTo(methodOn(MovieController.class).getMovies(page, size, sort, keywords, genres, releaseDate, cast, crew)).withSelfRel();
+			Link first = linkTo(methodOn(MovieController.class).getMovies(metadata.first().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.FIRST);
+			Link next = linkTo(methodOn(MovieController.class).getMovies(metadata.next().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.NEXT);
+			Link previous = linkTo(methodOn(MovieController.class).getMovies(metadata.previousOrFirst().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.PREVIOUS);
+			Link last = linkTo(methodOn(MovieController.class).getMovies(movies.getTotalPages() - 1, size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.LAST);
+			Link resource = linkTo(methodOn(MovieController.class).getMovie(null)).withRel(relationProvider.getItemResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(first);
+			links.add(next);
+			links.add(previous);
+			links.add(last);
+			links.add(resource);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), links, result.getStatus());
 
 	}
 
@@ -196,10 +212,21 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('USER')")
 	ResponseEntity<Object> getMovie(@PathVariable("id") String id) {
 
 		Result<Movie> result = movies.get(id);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -210,10 +237,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> createMovie(@Validated(OnCreate.class) @RequestBody Movie movie) {
 
 		Result<Movie> result = movies.create(movie);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(result.getResult().getId())).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -225,10 +264,23 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> updateMovie(@PathVariable("id") @NotBlank String id, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Movie> result = movies.update(id, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(result.getResult().getId())).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -239,10 +291,21 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> deleteMovie(@PathVariable("id") @NotBlank String id) {
 
 		Result<Movie> result = movies.delete(id);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -254,10 +317,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{id}/cast", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> createCast(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Cast cast) {
 
 		Result<Cast> result = movies.createCast(id, cast);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -270,10 +345,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{id}/cast/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> updateCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Cast> result = movies.updateCast(id, relationId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -285,10 +372,21 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{id}/cast/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> deleteCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
 		Result<Cast> result = movies.deleteCast(id, relationId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -300,10 +398,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{id}/crew", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> createCrew(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Crew crew) {
 
 		Result<Crew> result = movies.createCrew(id, crew);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -316,10 +426,22 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{id}/crew/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> updateCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Crew> result = movies.updateCrew(id, relationId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).getMovie(id)).withSelfRel();
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(self);
+			links.add(all);
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -331,10 +453,21 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{id}/crew/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Object> deleteCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
 		Result<Crew> result = movies.deleteCrew(id, relationId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link all = linkTo(MovieController.class).withRel(relationProvider.getCollectionResourceRelFor(Movie.class));
+
+			links.add(all);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -348,6 +481,7 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@GetMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('USER')")
 	ResponseEntity<Object> getAssessments(
 			@PathVariable("movieId") @NotBlank String movieId,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -367,8 +501,29 @@ public class MovieController {
 				matcher
 		);
 
-		Result<List<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		Result<Page<Assessment>> result = assessments.get(page, size, Sort.by(criteria), filter);
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Page<Assessment> assesments = result.getResult();
+			Pageable metadata = assesments.getPageable();
+
+			Link movie = linkTo(methodOn(MovieController.class).getMovie(movieId)).withRel("movie");
+			Link first = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.first().getPageNumber(), size, sort)).withRel(IanaLinkRelations.FIRST);
+			Link last = linkTo(methodOn(MovieController.class).getAssessments(movieId, assesments.getTotalPages() - 1, size, sort)).withRel(IanaLinkRelations.LAST);
+			Link next = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.next().getPageNumber(), size, sort)).withRel(IanaLinkRelations.NEXT);
+			Link previous = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.previousOrFirst().getPageNumber(), size, sort)).withRel(IanaLinkRelations.PREVIOUS);
+
+			links.add(movie);
+			links.add(first);
+			links.add(last);
+			links.add(next);
+			links.add(previous);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), links, result.getStatus());
 
 	}
 
@@ -380,10 +535,23 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PostMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("#assessment != null and #assessment.user != null and #assessment.user.email != null and #assessment.user.email == principal")
 	ResponseEntity<Object> createAssessment(@PathVariable("movieId") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForMovie(movieId, assessment);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link movie = linkTo(methodOn(MovieController.class).getMovie(result.getResult().getMovie().getId())).withRel("movie");
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+
+			links.add(movie);
+			links.add(movieAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -396,10 +564,25 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@PatchMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("@assessmentService.isAssessmentOwner(#assessmentId, principal)")
 	ResponseEntity<Object> updateAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForMovie(movieId, assessmentId, updates);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link self = linkTo(methodOn(MovieController.class).updateAssessment(movieId, assessmentId, updates)).withSelfRel();
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+			Link userAssessments = linkTo(methodOn(UserController.class).getAssessments(result.getResult().getUser().getEmail(), 0, 20, new ArrayList<>())).withRel("userAssessments");
+
+			links.add(self);
+			links.add(movieAssessments);
+			links.add(userAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 
@@ -411,10 +594,23 @@ public class MovieController {
 	 * @return respuesta HTTP
 	 */
 	@DeleteMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN') or @assessmentService.isAssessmentOwner(#assessmentId, principal)")
 	ResponseEntity<Object> deleteAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForMovie(movieId, assessmentId);
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), getEntityModel(), result.getStatus());
+		ArrayList<Link> links = new ArrayList<>();
+
+		if (result.getResult() != null) {
+
+			Link movieAssessments = linkTo(methodOn(MovieController.class).getAssessments(result.getResult().getMovie().getId(), 0, 20, new ArrayList<>())).withRel("movieAssessments");
+			Link userAssessments = linkTo(methodOn(UserController.class).getAssessments(result.getResult().getUser().getEmail(), 0, 20, new ArrayList<>())).withRel("userAssessments");
+
+			links.add(movieAssessments);
+			links.add(userAssessments);
+
+		}
+
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
 
 	}
 

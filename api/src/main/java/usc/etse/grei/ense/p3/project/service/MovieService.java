@@ -55,7 +55,7 @@ public class MovieService {
 	 * @param crewList criterio de filtrado por equipo de trabajo
 	 * @return resultado de la búsqueda
 	 */
-	public Result<List<Movie>> get(int page, int size, Sort sort, Example<Movie> filter, List<Cast> castList, List<Crew> crewList) {
+	public Result<Page<Movie>> get(int page, int size, Sort sort, Example<Movie> filter, List<Cast> castList, List<Crew> crewList) {
 
 		Pageable request = PageRequest.of(page, size, sort);
 
@@ -105,8 +105,11 @@ public class MovieService {
 		query.fields().include("_id", "title", "overview", "genres", "releaseDate", "resources");
 
 		List<Movie> result = mongo.find(query, Movie.class);
+		long totalElements = mongo.count(Query.query(criteria), Movie.class);
 
-		return new Result<>(result, false, "Movies found", 0, Result.Code.OK);
+		Page<Movie> pageResult = new PageImpl<>(result, request, totalElements);
+
+		return new Result<>(pageResult, false, "Movies found", 0, Result.Code.OK);
 
 	}
 

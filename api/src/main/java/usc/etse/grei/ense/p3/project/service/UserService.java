@@ -7,6 +7,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import usc.etse.grei.ense.p3.project.model.Date;
 import usc.etse.grei.ense.p3.project.model.*;
@@ -28,14 +29,16 @@ public class UserService {
 	private final PatchUtil patchUtil;
 	private final AssessmentRepository assessments;
 	private final Validator validator;
+	private final PasswordEncoder encoder;
 
 	@Autowired
-	public UserService(UserRepository users, MongoTemplate mongo, PatchUtil patchUtil, AssessmentRepository assessments, Validator validator) {
+	public UserService(UserRepository users, MongoTemplate mongo, PatchUtil patchUtil, AssessmentRepository assessments, Validator validator, PasswordEncoder encoder) {
 		this.users = users;
 		this.mongo = mongo;
 		this.patchUtil = patchUtil;
 		this.assessments = assessments;
 		this.validator = validator;
+		this.encoder = encoder;
 	}
 
 	/**
@@ -47,7 +50,7 @@ public class UserService {
 	 * @param filter criterio de filtrado por nombre o dirección de correo
 	 * @return resultado de la búsqueda
 	 */
-	public Result<List<User>> get(int page, int size, Sort sort, Example<User> filter) {
+	public Result<Page<User>> get(int page, int size, Sort sort, Example<User> filter) {
 
 		Pageable request = PageRequest.of(page, size, sort);
 
@@ -55,10 +58,14 @@ public class UserService {
 
 		Query query = Query.query(criteria).with(request);
 		query.fields().include("name", "country", "birthday", "picture");
+		query.fields().exclude("password", "roles");
 
 		List<User> result = mongo.find(query, User.class);
+		long totalElements = mongo.count(Query.query(criteria), User.class);
 
-		return new Result<>(result, false, "Users data", 0, Result.Code.OK);
+		Page<User> pageResult = new PageImpl<>(result, request, totalElements);
+
+		return new Result<>(pageResult, false, "Users data", 0, Result.Code.OK);
 
 	}
 
@@ -75,6 +82,9 @@ public class UserService {
 		if (result == null) {
 			return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
 		}
+
+		result.setPassword(null);
+		result.setRoles(null);
 
 		return new Result<>(result, false, "User data", 0, Result.Code.OK);
 
@@ -104,6 +114,12 @@ public class UserService {
 				return new Result<>(null, true, "Invalid birthday", 0, Result.Code.BAD_REQUEST);
 			}
 
+			user.setPassword(encoder.encode(user.getPassword()));
+
+			ArrayList<String> roles = new ArrayList<>();
+			roles.add("ROLE_USER");
+			user.setRoles(roles);
+
 			User newUser = users.insert(user);
 			return new Result<>(newUser, false, "User created", 0, Result.Code.CREATED);
 
@@ -132,7 +148,7 @@ public class UserService {
 				return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
 			}
 
-			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday") || ((String) op.get("path")).startsWith("/friends")));
+			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday") || ((String) op.get("path")).startsWith("/friends") || ((String) op.get("path")).startsWith("/roles")));
 
 			User filteredUser = patchUtil.patch(originalUser, operations);
 			List<User> friendsCopy = filteredUser.getFriends();
@@ -145,6 +161,11 @@ public class UserService {
 			}
 
 			filteredUser.setFriends(friendsCopy);
+
+			if (!filteredUser.getPassword().equals(originalUser.getPassword())) {
+				filteredUser.setPassword(encoder.encode(filteredUser.getPassword()));
+			}
+
 			User updatedUser = users.save(filteredUser);
 
 			ExampleMatcher matcher = ExampleMatcher.matching();
@@ -330,6 +351,32 @@ public class UserService {
 		}
 
 		return new Result<>(user, false, "Friend deleted", 0, Result.Code.OK);
+
+	}
+
+	/**
+	 * Metodo que comprueba si dos usuarios son amigos
+	 *
+	 * @param requestEmail correo electrónico del usuario solicitado en la petición
+	 * @param userEmail    correo electrónico del usuario que realiza la petición
+	 * @return resultado de la comprobación
+	 */
+	public Boolean areFriends(String requestEmail, String userEmail) {
+
+		User requestUser = users.findById(requestEmail).orElse(null);
+		User user = users.findById(userEmail).orElse(null);
+
+		if (requestUser == null || user == null) {
+			return false;
+		}
+
+		List<User> friends = user.getFriends();
+
+		if (friends == null) {
+			return false;
+		}
+
+		return friends.stream().anyMatch(f -> f.getEmail().equals(requestEmail));
 
 	}
 

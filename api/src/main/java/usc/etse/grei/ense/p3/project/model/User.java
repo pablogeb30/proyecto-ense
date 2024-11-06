@@ -40,6 +40,13 @@ public class User {
 	@Null(message = "The friends field is not allowed", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	private List<@Valid User> friends;
 
+	@NotBlank(message = "The password field can not be empty", groups = {OnCreate.class, OnUpdate.class})
+	@Null(message = "The password field is not allowed", groups = OnRelation.class)
+	private String password;
+
+	@Null(message = "The friends field is not allowed", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	private List<String> roles;
+
 	public User() {
 	}
 
@@ -103,6 +110,24 @@ public class User {
 
 	public User setFriends(List<User> friends) {
 		this.friends = friends;
+		return this;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public User setPassword(String password) {
+		this.password = password;
+		return this;
+	}
+
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	public User setRoles(List<String> roles) {
+		this.roles = roles;
 		return this;
 	}
 

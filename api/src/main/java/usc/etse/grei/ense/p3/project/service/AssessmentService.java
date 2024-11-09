@@ -297,14 +297,14 @@ public class AssessmentService {
 	 * Metodo que comprueba si un usuario es propietario de un comentario
 	 *
 	 * @param assessmentId identificador del comentario
-	 * @param email correo electrónico del usuario
+	 * @param email        correo electrónico del usuario
 	 * @return resultado de la comprobación
 	 */
-	public boolean isAssessmentOwner(String assessmentId, String email){
+	public boolean isAssessmentOwner(String assessmentId, String email) {
 
 		Assessment assessment = assessments.findById(assessmentId).orElse(null);
 
-        return assessment != null && assessment.getUser() != null && assessment.getUser().getEmail().equals(email);
-    }
+		return assessment != null && assessment.getUser() != null && assessment.getUser().getEmail().equals(email);
+	}
 
 }

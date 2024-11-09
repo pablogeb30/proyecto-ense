@@ -39,7 +39,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	/**
 	 * Metodo que autentica al usuario comprobando sus credenciales de inicio de sesión
 	 *
-	 * @param request solicitud HTTP
+	 * @param request  solicitud HTTP
 	 * @param response respuesta HTTP
 	 * @return detalles de la autenticación
 	 * @throws AuthenticationException excepcion
@@ -64,9 +64,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	/**
 	 * Metodo que genera un token cuando la autenticación es exitosa
 	 *
-	 * @param request solicitud HTTP
-	 * @param response respuesta HTTP
-	 * @param chain filtro de la cadena de seguridad
+	 * @param request    solicitud HTTP
+	 * @param response   respuesta HTTP
+	 * @param chain      filtro de la cadena de seguridad
 	 * @param authResult detalles de la autenticación
 	 */
 	@Override

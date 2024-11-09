@@ -1,6 +1,7 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
@@ -18,33 +19,96 @@ public class User {
 	@Id
 	@NotBlank(message = "The email field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	@Email(message = "The email field need to be a valid email", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "test@test.test",
+			description = "The email of the user",
+			format = "email",
+			type = "string"
+	)
 	private String email;
 
 	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "Nombre",
+			description = "The name of the user",
+			format = "string",
+			type = "string",
+			minLength = 2,
+			maxLength = 256
+	)
 	private String name;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "Spain",
+			description = "The country of the user",
+			format = "string",
+			type = "string",
+			minLength = 2,
+			maxLength = 256
+	)
 	private String country;
 
 	@URL(message = "The picture field need to be a valid URL", groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "https://placekitten.com/200/287",
+			description = "The picture of the user",
+			format = "url",
+			type = "string"
+	)
 	private String picture;
 
 	@Valid
 	@NotNull(message = "The birthday field is required", groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "2021-10-10",
+			description = "The birthday of the user",
+			format = "date",
+			type = "string",
+			minimum = "1900-01-01",
+			maximum = "2025-01-01"
+	)
 	private Date birthday;
 
 	@Null(message = "The friends field is not allowed", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			hidden = true,
+			description = "The friends of the user",
+			format = "array",
+			type = "array"
+	)
 	private List<@Valid User> friends;
 
 	@NotBlank(message = "The password field can not be empty", groups = {OnCreate.class, OnUpdate.class})
 	@Null(message = "The password field is not allowed", groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "password",
+			hidden = true,
+			description = "The password of the user",
+			format = "password",
+			type = "string"
+	)
 	private String password;
 
 	@Null(message = "The friends field is not allowed", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			hidden = true,
+			description = "The roles of the user",
+			format = "array",
+			type = "array"
+	)
 	private List<String> roles;
 
 	public User() {

@@ -1,6 +1,7 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -19,21 +20,56 @@ public class Assessment {
 	@Id
 	@NotNull(message = "The id field can not be empty", groups = OnUpdate.class)
 	@Null(message = "The rating field need to be null", groups = {OnUserCreate.class, OnMovieCreate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The id of the assessment",
+			format = "string",
+			type = "string",
+			example = "1"
+	)
 	private String id;
 
 	@NotNull(message = "The rating field can not be empty", groups = {OnUserCreate.class, OnMovieCreate.class, OnUpdate.class})
 	@Range(min = 1, max = 10, groups = {OnUserCreate.class, OnMovieCreate.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The rating of the assessment",
+			format = "int32",
+			type = "integer",
+			example = "5"
+	)
 	private Integer rating;
 
 	@Valid
 	@NotNull(message = "The user field can not be empty", groups = {OnMovieCreate.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The user of the assessment",
+			type = "object",
+			implementation = User.class
+	)
 	private User user;
 
 	@Valid
 	@NotNull(message = "The movie field can not be empty", groups = {OnUserCreate.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The movie of the assessment",
+			type = "object",
+			implementation = Movie.class
+	)
 	private Movie movie;
 
 	@Size(min = 1, max = 500, message = "The comment field must be between 1 and 500 characters", groups = {OnUserCreate.class, OnMovieCreate.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The comment of the assessment",
+			format = "string",
+			type = "string",
+			minLength = 1,
+			maxLength = 500,
+			example = "This is a comment"
+	)
 	private String comment;
 
 	public Assessment() {

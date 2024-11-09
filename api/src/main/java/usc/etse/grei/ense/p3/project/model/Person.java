@@ -1,6 +1,7 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Null;
@@ -18,30 +19,90 @@ public class Person {
 	@Id
 	@NotBlank(message = "The id field can not be empty", groups = {OnUpdate.class, OnRelation.class})
 	@Null(groups = OnCreate.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The id of the person",
+			format = "string",
+			type = "string",
+			example = "1"
+	)
 	private String id;
 
 	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "Nombre",
+			description = "The name of the person",
+			format = "string",
+			type = "string",
+			minLength = 2,
+			maxLength = 256
+	)
 	private String name;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "Spain",
+			description = "The country of the person",
+			format = "string",
+			type = "string",
+			minLength = 2,
+			maxLength = 256
+	)
 	private String country;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "https://www.google.com",
+			description = "The picture of the person",
+			format = "url",
+			type = "string",
+			pattern = "^(http|https)://.*$"
+	)
 	private String picture;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "Biography",
+			description = "The biography of the person",
+			format = "string",
+			type = "string",
+			minLength = 2,
+			maxLength = 256
+	)
 	private String biography;
 
 	@Valid
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "2021-10-10",
+			description = "The birthday of the person",
+			format = "date",
+			type = "string",
+			minimum = "1900",
+			maximum = "2024"
+	)
 	private Date birthday;
 
 	@Valid
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "2021-10-10",
+			description = "The deathday of the person",
+			format = "date",
+			type = "string",
+			minimum = "1900",
+			maximum = "2024"
+	)
 	private Date deathday;
 
 	public Person() {

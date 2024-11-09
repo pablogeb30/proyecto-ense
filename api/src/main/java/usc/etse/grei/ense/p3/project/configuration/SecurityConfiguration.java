@@ -12,6 +12,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +33,7 @@ import java.util.Map;
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity()
 public class SecurityConfiguration {
 
 	private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
@@ -61,7 +62,7 @@ public class SecurityConfiguration {
 	/**
 	 * Metodo que configura la cadena de filtros de seguridad para las solicitudes HTTP
 	 *
-	 * @param http configuración de la seguridad HTTP
+	 * @param http        configuración de la seguridad HTTP
 	 * @param authManager autenticador de usuarios
 	 * @return filtros de seguridad HTTP
 	 * @throws Exception excepcion
@@ -70,7 +71,7 @@ public class SecurityConfiguration {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authManager) throws Exception {
 
 		http
-				.csrf(csrf -> csrf.disable())
+				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
 				.addFilterBefore(new AuthenticationFilter(authManager, tokenSignKey()), UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(new AuthorizationFilter(authManager, tokenSignKey()), UsernamePasswordAuthenticationFilter.class)
@@ -101,10 +102,11 @@ public class SecurityConfiguration {
 		Map<String, List<String>> roles = new HashMap<>();
 		roles.put("ROLE_ADMIN", Collections.singletonList("ROLE_USER"));
 
-		RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
-		hierarchy.setHierarchy(RoleHierarchyUtils.roleHierarchyFromMap(roles));
+		// Genera la cadena de jerarquía a partir del mapa
+		String hierarchyString = RoleHierarchyUtils.roleHierarchyFromMap(roles);
 
-		return hierarchy;
+		// Usa fromHierarchy para crear RoleHierarchyImpl
+		return RoleHierarchyImpl.fromHierarchy(hierarchyString);
 
 	}
 

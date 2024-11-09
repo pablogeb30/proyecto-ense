@@ -1,10 +1,14 @@
 package usc.etse.grei.ense.p3.project.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.LinkRelationProvider;
@@ -56,6 +60,36 @@ public class UserController {
 	 */
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('USER')")
+	@Operation(
+			operationId = "getUsers",
+			summary = "Get users",
+			description = "Get a list of users"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The user details",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = User.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+	})
 	ResponseEntity<Object> getUsers(
 			@RequestParam(name = "page", required = false, defaultValue = "0") int page,
 			@RequestParam(name = "size", required = false, defaultValue = "20") int size,
@@ -112,6 +146,41 @@ public class UserController {
 	 */
 	@GetMapping(path = "{email}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN') or #email == principal or @userService.areFriends(#email, principal)")
+	@Operation(
+			operationId = "getUser",
+			summary = "Get user",
+			description = "Get a user by email"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The user details",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = User.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> getUser(@PathVariable("email") @NotBlank @Email String email) {
 
 		Result<User> result = users.get(email);
@@ -138,6 +207,31 @@ public class UserController {
 	 * @return respuesa HTTP
 	 */
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(
+			operationId = "createUser",
+			summary = "Create user",
+			description = "Create a new user"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "201",
+					description = "The user has been created",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = User.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "409",
+					description = "User already exists",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> createUser(@Validated(OnCreate.class) @RequestBody User user) {
 
 		Result<User> result = users.create(user);
@@ -166,6 +260,41 @@ public class UserController {
 	 */
 	@PatchMapping(path = "{email}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("#email == principal")
+	@Operation(
+			operationId = "updateUser",
+			summary = "Update user",
+			description = "Update a user by email"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The user has been updated",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = User.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> updateUser(@PathVariable("email") @NotBlank @Email String email, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<User> result = users.update(email, updates);
@@ -193,6 +322,38 @@ public class UserController {
 	 */
 	@DeleteMapping(path = "{email}")
 	@PreAuthorize("#email == principal")
+	@Operation(
+			operationId = "deleteUser",
+			summary = "Delete user",
+			description = "Delete a user by email"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The user has been deleted",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> deleteUser(@PathVariable("email") @NotBlank @Email String email) {
 
 		Result<User> result = users.delete(email);
@@ -219,6 +380,41 @@ public class UserController {
 	 */
 	@PostMapping(path = "{email}/friends", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("#email == principal")
+	@Operation(
+			operationId = "createFriend",
+			summary = "Create friend",
+			description = "Create a new friend for a user"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "201",
+					description = "The friend has been created",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = User.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> createFriend(@PathVariable("email") @NotBlank @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
 
 		Result<User> result = users.createFriend(email, friend, true);
@@ -235,6 +431,38 @@ public class UserController {
 	 */
 	@DeleteMapping(path = "{email}/friends/{friendEmail}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("#email == principal")
+	@Operation(
+			operationId = "deleteFriend",
+			summary = "Delete friend",
+			description = "Delete a friend for a user"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The friend has been deleted",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> deleteFriend(@PathVariable("email") @NotBlank @Email String email, @PathVariable("friendEmail") @NotBlank @Email String friendEmail) {
 
 		Result<User> result = users.deleteFriend(email, friendEmail, true);
@@ -253,6 +481,41 @@ public class UserController {
 	 */
 	@GetMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN') or #userId == principal or @userService.areFriends(#userId, principal)")
+	@Operation(
+			operationId = "getAssessments",
+			summary = "Get assessments",
+			description = "Get a list of assessments for a user"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The assessments details",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Assessment.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> getAssessments(
 			@PathVariable("userId") @NotBlank @Email String userId,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -307,6 +570,46 @@ public class UserController {
 	 */
 	@PostMapping(path = "{userId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("#userId == principal")
+	@Operation(
+			operationId = "createAssessment",
+			summary = "Create assessment",
+			description = "Create a new assessment for a user"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "201",
+					description = "The assessment has been created",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Assessment.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "409",
+					description = "Assessment already exists",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> createAssessment(@PathVariable("userId") @NotBlank @Email String userId, @Validated(OnUserCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForUser(userId, assessment);
@@ -336,6 +639,41 @@ public class UserController {
 	 */
 	@PatchMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("#userId == principal")
+	@Operation(
+			operationId = "updateAssessment",
+			summary = "Update assessment",
+			description = "Update an assessment for a user"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The assessment has been updated",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Assessment.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> updateAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForUser(userId, assessmentId, updates);
@@ -366,6 +704,38 @@ public class UserController {
 	 */
 	@DeleteMapping(path = "{userId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN') or #userId == principal")
+	@Operation(
+			operationId = "deleteAssessment",
+			summary = "Delete assessment",
+			description = "Delete an assessment for a user"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The assessment has been deleted",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> deleteAssessment(@PathVariable("userId") @NotBlank @Email String userId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForUser(userId, assessmentId);

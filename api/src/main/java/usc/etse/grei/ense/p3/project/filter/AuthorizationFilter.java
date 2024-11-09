@@ -33,10 +33,10 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 	/**
 	 * Metodo que verifica si una solicitud contiene un token y configura la autenticación del usuario
 	 *
-	 * @param request solicitud HTTP
+	 * @param request  solicitud HTTP
 	 * @param response respuesta HTTP
-	 * @param chain filtro de la cadena de seguridad
-	 * @throws IOException excepcion
+	 * @param chain    filtro de la cadena de seguridad
+	 * @throws IOException      excepcion
 	 * @throws ServletException excepcion
 	 */
 	@Override

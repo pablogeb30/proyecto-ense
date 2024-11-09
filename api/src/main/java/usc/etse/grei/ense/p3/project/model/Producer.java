@@ -1,6 +1,7 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -11,12 +12,39 @@ import java.util.StringJoiner;
 public class Producer {
 
 	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "Nombre",
+			description = "The name of the producer",
+			format = "string",
+			type = "string",
+			minLength = 2,
+			maxLength = 256
+	)
 	private String name;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "https://www.google.com",
+			description = "The logo of the producer",
+			format = "url",
+			type = "string",
+			pattern = "^(http|https)://.*$"
+	)
 	private String logo;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnRelation.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			example = "Spain",
+			description = "The country of the producer",
+			format = "string",
+			type = "string",
+			minLength = 2,
+			maxLength = 256
+	)
 	private String country;
 
 	public Producer() {

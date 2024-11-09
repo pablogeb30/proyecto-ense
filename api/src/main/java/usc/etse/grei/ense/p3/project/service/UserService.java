@@ -151,8 +151,12 @@ public class UserService {
 			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/email") || op.get("path").equals("/birthday") || ((String) op.get("path")).startsWith("/friends") || ((String) op.get("path")).startsWith("/roles")));
 
 			User filteredUser = patchUtil.patch(originalUser, operations);
+
 			List<User> friendsCopy = filteredUser.getFriends();
+			List<String> rolesCopy = filteredUser.getRoles();
+
 			filteredUser.setFriends(null);
+			filteredUser.setRoles(null);
 
 			Set<ConstraintViolation<User>> violations = validator.validate(filteredUser, OnUpdate.class);
 
@@ -161,6 +165,7 @@ public class UserService {
 			}
 
 			filteredUser.setFriends(friendsCopy);
+			filteredUser.setRoles(rolesCopy);
 
 			if (!filteredUser.getPassword().equals(originalUser.getPassword())) {
 				filteredUser.setPassword(encoder.encode(filteredUser.getPassword()));

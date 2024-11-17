@@ -9,6 +9,10 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(
+		name = "Producer",
+		description = "The producer of a movie"
+)
 public class Producer {
 
 	@NotBlank(message = "The name field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})

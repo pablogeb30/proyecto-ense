@@ -9,6 +9,10 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(
+		name = "Date",
+		description = "Date representation"
+)
 public class Date {
 
 	@NotNull(message = "The day field can not be empty", groups = {OnCreate.class, OnUpdate.class})

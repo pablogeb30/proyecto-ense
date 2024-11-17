@@ -10,6 +10,10 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(
+		name = "Crew",
+		description = "A crew member of a movie"
+)
 public class Crew extends Person {
 
 	@NotBlank(message = "The job field can not be empty", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})

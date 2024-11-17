@@ -1,5 +1,12 @@
 package usc.etse.grei.ense.p3.project.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +39,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RestController
 @RequestMapping("movies")
+@Tag(name = "Movie API", description = "Movie related operations")
+@SecurityRequirement(name = "JWT")
 public class MovieController {
 
 	private final MovieService movies;
@@ -60,6 +69,36 @@ public class MovieController {
 	 */
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('USER')")
+	@Operation(
+			operationId = "getMovies",
+			summary = "Get movies",
+			description = "Get a list of movies"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The movie details",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Movie.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+	})
 	ResponseEntity<Object> getMovies(
 			@RequestParam(name = "page", required = false, defaultValue = "0") int page,
 			@RequestParam(name = "size", required = false, defaultValue = "20") int size,
@@ -213,6 +252,41 @@ public class MovieController {
 	 */
 	@GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('USER')")
+	@Operation(
+			operationId = "getMovie",
+			summary = "Get movie",
+			description = "Get a movie by id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The movie details",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Movie.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> getMovie(@PathVariable("id") String id) {
 
 		Result<Movie> result = movies.get(id);
@@ -238,6 +312,41 @@ public class MovieController {
 	 */
 	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "createMovie",
+			summary = "Create movie",
+			description = "Create a new movie"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "201",
+					description = "The movie has been created",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Movie.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "409",
+					description = "Movie already exists",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> createMovie(@Validated(OnCreate.class) @RequestBody Movie movie) {
 
 		Result<Movie> result = movies.create(movie);
@@ -265,6 +374,41 @@ public class MovieController {
 	 */
 	@PatchMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "updateMovie",
+			summary = "Update movie",
+			description = "Update a movie by id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The movie has been updated",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Movie.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> updateMovie(@PathVariable("id") @NotBlank String id, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Movie> result = movies.update(id, updates);
@@ -292,6 +436,38 @@ public class MovieController {
 	 */
 	@DeleteMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "deleteMovie",
+			summary = "Delete movie",
+			description = "Delete a movie by id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The movie has been deleted",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> deleteMovie(@PathVariable("id") @NotBlank String id) {
 
 		Result<Movie> result = movies.delete(id);
@@ -318,6 +494,46 @@ public class MovieController {
 	 */
 	@PostMapping(path = "{id}/cast", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "createCast",
+			summary = "Create cast",
+			description = "Add a new member of the cast for a movie by id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "201",
+					description = "Cast added",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Movie.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "409",
+					description = "Combination person-character is already in cast",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> createCast(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Cast cast) {
 
 		Result<Cast> result = movies.createCast(id, cast);
@@ -346,6 +562,46 @@ public class MovieController {
 	 */
 	@PatchMapping(path = "{id}/cast/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "updateCast",
+			summary = "Update cast",
+			description = "Update cast member for a movie by movie id and relation id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "Cast updated",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Movie.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "409",
+					description = "Combination person-character is already in cast",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> updateCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Cast> result = movies.updateCast(id, relationId, updates);
@@ -373,6 +629,38 @@ public class MovieController {
 	 */
 	@DeleteMapping(path = "{id}/cast/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "deleteCast",
+			summary = "Delete cast",
+			description = "Delete a cast member for a movie by movie id and relation id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "Cast removed",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> deleteCast(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
 		Result<Cast> result = movies.deleteCast(id, relationId);
@@ -399,6 +687,46 @@ public class MovieController {
 	 */
 	@PostMapping(path = "{id}/crew", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "createCrew",
+			summary = "Create crew",
+			description = "Add a new member of the crew for a movie by id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "201",
+					description = "Crew added",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Movie.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "409",
+					description = "Combination person-job is already in crew",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> createCrew(@PathVariable("id") @NotBlank String id, @RequestBody @Validated(OnRelation.class) Crew crew) {
 
 		Result<Crew> result = movies.createCrew(id, crew);
@@ -427,6 +755,46 @@ public class MovieController {
 	 */
 	@PatchMapping(path = "{id}/crew/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "updateCrew",
+			summary = "Update crew",
+			description = "Update crew member for a movie by movie id and relation id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "Crew updated",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Movie.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "409",
+					description = "Combination person-job is already in crew",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> updateCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Crew> result = movies.updateCrew(id, relationId, updates);
@@ -454,6 +822,38 @@ public class MovieController {
 	 */
 	@DeleteMapping(path = "{id}/crew/{relationId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(
+			operationId = "deleteCrew",
+			summary = "Delete crew",
+			description = "Delete a crew member for a movie by movie id and relation id"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "Crew removed",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> deleteCrew(@PathVariable("id") @NotBlank String id, @PathVariable("relationId") @NotNull Integer relationId) {
 
 		Result<Crew> result = movies.deleteCrew(id, relationId);
@@ -482,6 +882,41 @@ public class MovieController {
 	 */
 	@GetMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('USER')")
+	@Operation(
+			operationId = "getAssessments",
+			summary = "Get assessments",
+			description = "Get a list of assessments for a movie"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The assessments details",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Assessment.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> getAssessments(
 			@PathVariable("movieId") @NotBlank String movieId,
 			@RequestParam(name = "page", defaultValue = "0") int page,
@@ -536,6 +971,46 @@ public class MovieController {
 	 */
 	@PostMapping(path = "{movieId}/assessments", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("#assessment != null and #assessment.user != null and #assessment.user.email != null and #assessment.user.email == principal")
+	@Operation(
+			operationId = "createAssessment",
+			summary = "Create assessment",
+			description = "Create a new assessment for a movie"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "201",
+					description = "The assessment has been created",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Assessment.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "409",
+					description = "Assessment already exists",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> createAssessment(@PathVariable("movieId") @NotBlank String movieId, @Validated(OnMovieCreate.class) @RequestBody Assessment assessment) {
 
 		Result<Assessment> result = assessments.createForMovie(movieId, assessment);
@@ -565,6 +1040,41 @@ public class MovieController {
 	 */
 	@PatchMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("@assessmentService.isAssessmentOwner(#assessmentId, principal)")
+	@Operation(
+			operationId = "updateAssessment",
+			summary = "Update assessment",
+			description = "Update an assessment for a movie"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The assessment has been updated",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = Assessment.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> updateAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId, @RequestBody List<Map<String, Object>> updates) {
 
 		Result<Assessment> result = assessments.updateForMovie(movieId, assessmentId, updates);
@@ -595,6 +1105,38 @@ public class MovieController {
 	 */
 	@DeleteMapping(path = "{movieId}/assessments/{assessmentId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasRole('ADMIN') or @assessmentService.isAssessmentOwner(#assessmentId, principal)")
+	@Operation(
+			operationId = "deleteAssessment",
+			summary = "Delete assessment",
+			description = "Delete an assessment for a movie"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The assessment has been deleted",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "Movie not found",
+					content = @Content
+			)
+	})
 	ResponseEntity<Object> deleteAssessment(@PathVariable("movieId") @NotBlank String movieId, @PathVariable("assessmentId") @NotBlank String assessmentId) {
 
 		Result<Assessment> result = assessments.deleteForMovie(movieId, assessmentId);

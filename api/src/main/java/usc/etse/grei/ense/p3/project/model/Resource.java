@@ -10,6 +10,10 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(
+		name = "Resource",
+		description = "The resource representation"
+)
 public class Resource {
 
 	@URL(message = "The url field must be and URL", groups = {OnCreate.class, OnRelation.class, OnUpdate.class})

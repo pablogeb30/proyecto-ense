@@ -15,6 +15,10 @@ import java.util.StringJoiner;
 
 @Document(collection = "assessments")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(
+		name = "Assessment",
+		description = "An assessment representation from a user for a movie"
+)
 public class Assessment {
 
 	@Id

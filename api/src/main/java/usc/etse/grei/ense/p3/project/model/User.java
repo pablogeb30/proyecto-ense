@@ -14,6 +14,10 @@ import java.util.StringJoiner;
 
 @Document(collection = "users")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(
+		name = "User",
+		description = "A complete user representation"
+)
 public class User {
 
 	@Id

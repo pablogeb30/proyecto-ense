@@ -1,6 +1,7 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Null;
@@ -15,63 +16,181 @@ import java.util.StringJoiner;
 
 @Document(collection = "movies")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(
+		name = "Movie",
+		description = "A complete movie representation"
+)
 public class Movie {
 
 	@Id
 	@NotBlank(message = "The title field can not be empty", groups = OnRelation.class)
 	@Null(groups = OnCreate.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The id of the movie",
+			format = "string",
+			type = "string",
+			example = "1"
+	)
 	private String id;
 
 	@NotBlank(message = "The title field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The title of the movie",
+			format = "string",
+			type = "string",
+			example = "Inception",
+			minLength = 1,
+			maxLength = 256
+	)
 	private String title;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "A brief overview of the movie",
+			format = "string",
+			type = "string",
+			example = "A thief who steals corporate secrets...",
+			minLength = 1,
+			maxLength = 512
+	)
 	private String overview;
 
 	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The tagline of the movie",
+			format = "string",
+			type = "string",
+			example = "Your mind is the scene of the crime",
+			minLength = 1,
+			maxLength = 256
+	)
 	private String tagline;
 
 	@Valid
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The collection the movie belongs to",
+			type = "object",
+			implementation = Collection.class
+	)
 	private Collection collection;
 
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "List of genres the movie belongs to",
+			format = "array",
+			type = "array"
+	)
 	private List<@NotBlank(message = "The genre can not be empyt", groups = {OnCreate.class, OnUpdate.class}) String> genres;
 
 	@Valid
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The release date of the movie",
+			format = "date",
+			type = "string",
+			example = "2010-08-06",
+			minimum = "1900-01-01",
+			maximum = "2025-01-01"
+	)
 	private Date releaseDate;
 
 	@Null(groups = OnRelation.class)
-	private List<@NotBlank(message = "The genre can not be empyt", groups = {OnCreate.class, OnUpdate.class}) String> keywords;
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "List of keywords related to the movie",
+			format = "array",
+			type = "array"
+	)
+	private List<@NotBlank(message = "The keyword can not be empyt", groups = {OnCreate.class, OnUpdate.class}) String> keywords;
 
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "List of producers involved in the movie",
+			format = "array",
+			type = "array"
+	)
 	private List<@Valid Producer> producers;
 
 	@Null(groups = {OnCreate.class, OnRelation.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "List of crew members involved in the movie",
+			format = "array",
+			type = "array"
+	)
 	private List<@Valid Crew> crew;
 
 	@Null(groups = {OnCreate.class, OnRelation.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "List of cast members in the movie",
+			format = "array",
+			type = "array"
+	)
 	private List<@Valid Cast> cast;
 
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "List of resources related to the movie",
+			format = "array",
+			type = "array",
+			allowableValues = {"POSTER", "BACKDROP", "TRAILER", "NETFLIX", "AMAZON_PRIME", "DISNEY_PLUS", "ITUNES", "HBO", "YOUTUBE", "GOOGLE_PLAY", "TORRENT"}
+	)
 	private List<@Valid Resource> resources;
 
 	@Positive(groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The budget of the movie in USD",
+			format = "int64",
+			type = "number",
+			example = "160000000"
+	)
 	private Long budget;
 
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The current status of the movie",
+			type = "string",
+			enumAsRef = true,
+			allowableValues = {"RUMORED", "PLANNED", "PRODUCTION", "POSTPRODUCTION", "RELEASED", "CANCELLED"}
+	)
 	private Status status;
 
 	@Positive(groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The runtime of the movie in minutes",
+			format = "int32",
+			type = "integer",
+			example = "148"
+	)
 	private Integer runtime;
 
 	@Null(groups = OnRelation.class)
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The revenue generated by the movie in USD",
+			format = "int64",
+			type = "number",
+			example = "851532764"
+	)
 	private Long revenue;
 
 	public Movie() {

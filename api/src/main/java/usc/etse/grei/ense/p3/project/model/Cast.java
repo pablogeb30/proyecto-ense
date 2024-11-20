@@ -1,17 +1,42 @@
 package usc.etse.grei.ense.p3.project.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(
+		name = "Cast",
+		description = "A cast member of a movie"
+)
 public class Cast extends Person {
 
 	@NotBlank(message = "The character field can not be empty", groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class, OnRelation.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The character of the cast",
+			format = "string",
+			type = "string",
+			example = "Character",
+			minLength = 2,
+			maxLength = 256
+	)
 	private String character;
 
+	@NotNull(message = "The relationId field can not be empty", groups = {OnCreate.class, OnUpdate.class})
+	@Schema(
+			requiredMode = Schema.RequiredMode.AUTO,
+			description = "The relation id of the cast",
+			format = "int32",
+			type = "integer",
+			example = "1"
+	)
 	private Integer relationId;
 
 	public Cast() {

@@ -58,7 +58,6 @@ public class UserService {
 
 		Query query = Query.query(criteria).with(request);
 		query.fields().include("name", "country", "birthday", "picture");
-		query.fields().exclude("password", "roles");
 
 		List<User> result = mongo.find(query, User.class);
 		long totalElements = mongo.count(Query.query(criteria), User.class);

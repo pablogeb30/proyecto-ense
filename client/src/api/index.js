@@ -3,113 +3,314 @@ import DATA from './data'
 let __instance = null
 
 export default class API {
-    #token = sessionStorage.getItem('token') || null
 
-    static instance() {
-        if(__instance == null)
-            __instance = new API()
+	#url = 'http://localhost:8080'
+	#token = localStorage.getItem('token') || null
 
-        return __instance
-    }
+	#formatSortObject(sortObject) {
+		return Object.entries(sortObject)
+			.map(([key, value]) => `${value}${key}`)
+			.join(',');
+	}
 
-    async login(email, pass) {
-        // TODO fetch from API and if successful, store token from response headers
-        const user = DATA.users.find(u => u.email === email)
+	static instance() {
 
-        if(user.password === pass) {
-            localStorage.setItem('user', email)
-            localStorage.setItem('token', 'TEST TOKEN')
-            this.#token = 'TEST TOKEN'
-            return true
-        } else {
-            return false
-        }
-    }
-    async logout() {
-        this.#token = null
-        localStorage.clear()
+		if(__instance == null) {
 
-        return true
-    }
-    async findMovies(
-        {
-            filter: { genre = '', title = '', status = '' } = { genre : '', title : '', status : '' },
-            sort,
-            pagination: {page = 0, size = 7} = { page: 0, size: 7 }
-        } = {
-            filter: { genre : '', title : '', status : '' },
-            sort: {},
-            pagination: { page: 0, size: 7 }
-        }
-    ) {
-        return new Promise(resolve => {
-            const filtered = DATA.movies
-                ?.filter(movie => movie.title.toLowerCase().includes(title.toLowerCase() || ''))
-                ?.filter(movie => genre !== '' ? movie.genres.map(genre => genre.toLowerCase()).includes(genre.toLowerCase()) : true)
-                ?.filter(movie => movie.status.toLowerCase().includes(status.toLowerCase() || ''))
+			__instance = new API()
 
-            const data = {
-                content: filtered?.slice(size * page, size * page + size),
-                pagination: {
-                    hasNext: size * page + size < filtered.length,
-                    hasPrevious: page > 0
-                }
-            }
+		}
 
-            resolve(data)
-        })
-    }
-    async findMovie(id) {
-        return DATA.movies.find(movie => movie.id === id)
-    }
-    async findUser(id) {
-        return new Promise(resolve => {
-            const user = DATA.users.find(user => user.email === id)
+		return __instance
 
-            resolve(user)
-        })
-    }
+	}
 
-    async findComments(
-        {
-            filter: { movie = '', user = '' } = { movie: '', user: '' },
-            sort,
-            pagination: {page = 0, size = 10} = { page: 0, size: 10}
-        } = {
-            filter: { movie: '', user: '' },
-            sort: {},
-            pagination: { page: 0, size: 10}
-        }
-    ) {
-        return new Promise(resolve => {
-            const filtered = DATA.comments
-                ?.filter(comment => comment?.movie?.id === movie)
+	async login(email, pass) {
 
-            const data = {
-                content: filtered?.slice(size * page, size * page + size),
-                pagination: {
-                    hasNext: size * page + size < filtered.length,
-                    hasPrevious: page > 0
-                }
-            }
+		let body = {
+			"email": email,
+			"password": pass
+		}
 
-            resolve(data)
-        })
-    }
+		let response = await fetch(`${this.#url}/login`, {
 
-    async createComment(comment) {
-        return new Promise(resolve => {
-            DATA.comments.unshift(comment)
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(body)
 
-            resolve(true)
-        })
-    }
+		})
 
-    async createUser(user) {
-        console.log(user)
-    }
+		if(response.ok) {
 
-    async updateUser(id, user) {
-        console.log(user)
-    }
+			let token = response.headers.get('authentication')
+
+			localStorage.setItem('user', email)
+			localStorage.setItem('token', token)
+			this.#token = token
+
+			localStorage.setItem('name', await this.findUser(email).name)
+
+			return true
+
+		} else {
+
+			return false
+
+		}
+
+	}
+
+	async logout() {
+
+		this.#token = null
+		localStorage.clear()
+
+		return true
+
+	}
+
+	async findMovies(
+		{
+			filter: { genre = '', title = '', status = '' } = { genre : '', title : '', status : '' },
+			sort,
+			pagination: {page = 0, size = 7} = { page: 0, size: 7 }
+		} = {
+			filter: { genre : '', title : '', status : '' },
+			sort: {},
+			pagination: { page: 0, size: 7 }
+		}
+	) {
+
+		let query = new URLSearchParams({
+			"genres": genre,
+			"status": status,
+			"title": title,
+			"sort": sort != null ? this.#formatSortObject(sort) : null,
+			"page": page,
+			"size": size
+		})
+
+		let response = await fetch(`${this.#url}/movies?${query}`, {
+
+			method: 'GET',
+			headers: {
+				'Authorization': this.#token
+			}
+
+		})
+
+		if(response.ok) {
+
+			let data = await response.json()
+			let movies = data.data
+
+			let links = response.headers.get('link').split(',')
+			let hasNext = false
+			let hasPrevious = false
+
+			let actualLink = links.find(link => link.includes('rel="self"')).split(';')[0].replace('<', '').replace('>', '').trim()
+			let lastLink = links.find(link => link.includes('rel="last"')).split(';')[0].replace('<', '').replace('>', '').trim()
+			let firstLink = links.find(link => link.includes('rel="first"')).split(';')[0].replace('<', '').replace('>', '').trim()
+
+			if (actualLink !== lastLink) {
+				hasNext = true
+			}
+
+			if (actualLink !== firstLink) {
+				hasPrevious = true
+			}
+
+			let returnData = {
+				content: movies,
+				pagination: {
+					hasNext: hasNext,
+					hasPrevious: hasPrevious
+				}
+			}
+
+			return returnData
+
+		} else {
+
+			return []
+
+		}
+
+	}
+
+	async findMovie(id) {
+
+		let response = await fetch(`${this.#url}/movies/${id}`, {
+
+			method: 'GET',
+			headers: {
+				'Authorization': this.#token
+			}
+
+		})
+
+		if(response.ok) {
+
+			let data = await response.json()
+			let movie = data.data
+
+			return movie
+
+		} else {
+
+			return null
+
+		}
+
+	}
+
+	async findUser(id) {
+
+		let response = await fetch(`${this.#url}/users/${id}`, {
+
+			method: 'GET',
+			headers: {
+				'Authorization': this.#token
+			}
+
+		})
+
+		if(response.ok) {
+
+			let data = await response.json()
+			let user = data.data
+
+			return user
+
+		} else {
+
+			return null
+
+		}
+
+	}
+
+	async findComments(
+		{
+			filter: { movie = '', user = '' } = { movie: '', user: '' },
+			sort,
+			pagination: {page = 0, size = 3} = { page: 0, size: 3}
+		} = {
+			filter: { movie: '', user: '' },
+			sort: {},
+			pagination: { page: 0, size: 3}
+		}
+	) {
+
+		if (movie == '' && user == '') {
+			return { content: [], pagination: { hasNext: false, hasPrevious: false } }
+		}
+
+		let url
+
+		if (movie) {
+			url = `${this.#url}/movies/${movie}/assessments`
+		} else {
+			url = `${this.#url}/users/${user}/assessments`
+		}
+
+		let response = await fetch(url, {
+
+			method: 'GET',
+			headers: {
+				'Authorization': this.#token,
+				'Content-Type': 'application/json'
+			}
+
+		})
+
+		if(response.ok) {
+
+			let data = await response.json()
+			let comments = data.data
+
+			let links = response.headers.get('link').split(',')
+			let hasNext = false
+			let hasPrevious = false
+
+			let actualLink = links.find(link => link.includes('rel="self"')).split(';')[0].replace('<', '').replace('>', '').trim()
+			let lastLink = links.find(link => link.includes('rel="last"')).split(';')[0].replace('<', '').replace('>', '').trim()
+			let firstLink = links.find(link => link.includes('rel="first"')).split(';')[0].replace('<', '').replace('>', '').trim()
+
+			if (actualLink !== lastLink) {
+				hasNext = true
+			}
+
+			if (actualLink !== firstLink) {
+				hasPrevious = true
+			}
+
+			return { content: comments, pagination: { hasNext: hasNext, hasPrevious: hasPrevious } }
+
+		} else {
+
+			return { content: [], pagination: { hasNext: false, hasPrevious: false } }
+
+		}
+
+	}
+
+	async createComment(comment) {
+
+		let body = {
+			"rating": comment.rating,
+			"comment": comment.comment,
+			"user": {
+				"email": localStorage.getItem('user'),
+				"name": localStorage.getItem('name')
+			}
+		}
+
+		let response = await fetch(`${this.#url}/movies/${comment.id}/assessments`, {
+
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': this.#token
+			},
+			body: JSON.stringify(body)
+
+		})
+
+		return response.ok
+
+	}
+
+	async createUser(user) {
+
+		let response = await fetch(`${this.#url}/users`, {
+
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(user)
+
+		})
+
+		if(response.ok) {
+
+			let data = await response.json()
+			let user = data.data
+
+			return user
+
+		} else {
+
+			return null
+
+		}
+
+	}
+
+	async updateUser(id, user) {
+		console.log(user)
+	}
 }

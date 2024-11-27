@@ -548,12 +548,14 @@ public class UserController {
 			Pageable metadata = assesments.getPageable();
 
 			Link user = linkTo(methodOn(UserController.class).getUser(userId)).withRel("user");
+			Link self = linkTo(methodOn(UserController.class).getAssessments(userId, metadata.getPageNumber(), size, sort)).withSelfRel();
 			Link first = linkTo(methodOn(UserController.class).getAssessments(userId, metadata.first().getPageNumber(), size, sort)).withRel(IanaLinkRelations.FIRST);
 			Link last = linkTo(methodOn(UserController.class).getAssessments(userId, assesments.getTotalPages() - 1, size, sort)).withRel(IanaLinkRelations.LAST);
 			Link next = linkTo(methodOn(UserController.class).getAssessments(userId, metadata.next().getPageNumber(), size, sort)).withRel(IanaLinkRelations.NEXT);
 			Link previous = linkTo(methodOn(UserController.class).getAssessments(userId, metadata.previousOrFirst().getPageNumber(), size, sort)).withRel(IanaLinkRelations.PREVIOUS);
 
 			links.add(user);
+			links.add(self);
 			links.add(first);
 			links.add(last);
 			links.add(next);
@@ -561,7 +563,7 @@ public class UserController {
 
 		}
 
-		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), links, result.getStatus());
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult().stream().toArray(), links, result.getStatus());
 
 	}
 

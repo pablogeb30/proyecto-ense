@@ -2,14 +2,14 @@ import { Shell, MovieList, Carousel } from '../../components'
 
 export default function Movies() {
     return <Shell>
-        <Carousel query = {{sort: { releaseDate: 'DESC'}, pagination: { size: 7 }}} />
+        <Carousel query = {{sort: { 'releaseDate.year': '-', 'releaseDate.month': '-', 'releaseDate.day': '-' }, pagination: { size: 7 }}} />
 
         <section className = 'bg-pattern-1'>
             <MovieList title = 'Destacadas'
                        paginationVariant = 'inverse'
                        className = 'pt-6 pb-12 max-w-screen-2xl'
                        titleClassName = 'select-none bg-gradient-to-br from-pink-500 to-yellow-500 via-red-500 p-2 uppercase text-white inline-block transform -skew-x-12 -rotate-3 translate-y-4'
-                       query = {{sort: { 'releaseDate': 'ASC' }, pagination: { size: 7 }}}
+                       query = {{sort: { 'releaseDate.year': '+', 'releaseDate.month': '+', 'releaseDate.day': '+' }, pagination: { size: 7 }}}
             />
         </section>
 
@@ -18,7 +18,7 @@ export default function Movies() {
                        paginationVariant = 'plain-secondary'
                        className = 'pt-6 pb-12 max-w-screen-2xl'
                        titleClassName = 'select-none bg-black p-2 uppercase text-white inline-block transform -skew-x-12 -rotate-3 translate-y-4'
-                       query = {{filter: {'genre': 'acción'}, sort: { 'releaseDate': 'ASC' }, pagination: { size: 7 }}}
+                       query = {{filter: {'genre': 'Acción'}, sort: { 'releaseDate.year': '+', 'releaseDate.month': '+', 'releaseDate.day': '+' }, pagination: { size: 7 }}}
             />
         </section>
 
@@ -27,7 +27,7 @@ export default function Movies() {
                        paginationVariant = 'primary'
                        className = 'pt-6 pb-12 max-w-screen-2xl'
                        titleClassName = 'select-none bg-gradient-to-br from-pink-500 to-yellow-500 via-red-500 p-2 uppercase text-white inline-block transform -skew-x-12 -rotate-3 translate-y-4'
-                       query = {{filter: {'genre': 'animación'}, sort: { 'releaseDate': 'ASC' }, pagination: { size: 7 }}}
+                       query = {{filter: {'genre': 'Animación'}, sort: { 'releaseDate.year': '+', 'releaseDate.month': '+', 'releaseDate.day': '+' }, pagination: { size: 7 }}}
             />
         </section>
 
@@ -36,7 +36,7 @@ export default function Movies() {
                        paginationVariant = 'plain-secondary'
                        className = 'pt-6 pb-12 max-w-screen-2xl'
                        titleClassName = 'select-none bg-black p-2 uppercase text-white inline-block transform -skew-x-12 -rotate-3 translate-y-4'
-                       query = {{filter: {'genre': 'ciencia ficción'}, sort: { 'releaseDate': 'ASC' }, pagination: { size: 7 }}}
+                       query = {{filter: {'genre': 'Ciencia ficción'}, sort: { 'releaseDate.year': '+', 'releaseDate.month': '+', 'releaseDate.day': '+' }, pagination: { size: 7 }}}
             />
         </section>
 
@@ -45,7 +45,7 @@ export default function Movies() {
                        paginationVariant = 'primary'
                        className = 'pt-6 pb-12 max-w-screen-2xl'
                        titleClassName = 'select-none bg-gradient-to-br from-pink-500 to-yellow-500 via-red-500 p-2 uppercase text-white inline-block transform -skew-x-12 -rotate-3 translate-y-4'
-                       query = {{filter: {'genre': 'documental'}, sort: { 'releaseDate': 'ASC' }, pagination: { size: 7 }}}
+                       query = {{filter: {'genre': 'Documental'}, sort: { 'releaseDate.year': '+', 'releaseDate.month': '+', 'releaseDate.day': '+' }, pagination: { size: 7 }}}
             />
         </section>
 
@@ -54,7 +54,7 @@ export default function Movies() {
                        paginationVariant = 'plain-secondary'
                        className = 'pt-6 pb-12 max-w-screen-2xl'
                        titleClassName = 'select-none bg-black p-2 uppercase text-white inline-block transform -skew-x-12 -rotate-3 translate-y-4'
-                       query = {{filter: {'genre': 'fantasía'}, sort: { 'releaseDate': 'ASC' }, pagination: { size: 7 }}}
+                       query = {{filter: {'genre': 'Fantasía'}, sort: { 'releaseDate.year': '+', 'releaseDate.month': '+', 'releaseDate.day': '+' }, pagination: { size: 7 }}}
             />
         </section>
 
@@ -63,7 +63,7 @@ export default function Movies() {
                        paginationVariant = 'primary'
                        className = 'pt-6 pb-12 max-w-screen-2xl'
                        titleClassName = 'select-none bg-gradient-to-br from-pink-500 to-yellow-500 via-red-500 p-2 uppercase text-white inline-block transform -skew-x-12 -rotate-3 translate-y-4'
-                       query = {{filter: {'title': 'LEGO'}, sort: { 'releaseDate': 'ASC' }, pagination: { size: 7 }}}
+                       query = {{filter: {'title': 'LEGO'}, sort: { 'releaseDate.year': '+', 'releaseDate.month': '+', 'releaseDate.day': '+' }, pagination: { size: 7 }}}
             />
         </section>
     </Shell>

@@ -2,9 +2,11 @@ import { useParams } from 'react-router-dom'
 import { ArrowCircleLeftOutline as Back, PencilAltOutline as Edit } from '@graywolfai/react-heroicons'
 import ReactPlayer from 'react-player'
 
-import { Shell, Link, TODO, Separator } from '../../components'
+import { Shell, Link, Separator, CommentForm, CommentList } from '../../components'
 
 import { useMovie, useComments } from '../../hooks'
+
+import { useState } from 'react'
 
 import Disney from './icons/disney_plus.png'
 import Play from './icons/google_play.png'
@@ -64,7 +66,7 @@ function Header({ movie }) {
              alt = { `${ movie.title } poster` }
              className = 'w-64 rounded-lg shadow-xl z-20' />
         <hgroup className = 'flex-1'>
-            <h1 className = {`bg-black bg-opacity-50 backdrop-filter backdrop-blur 
+            <h1 className = {`bg-black bg-opacity-50 backdrop-filter backdrop-blur
                                           text-right text-white text-6xl font-bold
                                           p-8`}>
                 { movie.title }
@@ -117,13 +119,35 @@ function Cast({ movie }) {
         </ul>
     </>
 }
-function Comments({ movie }) {
-    const { comments, createComment } = useComments({ filter: { movie : movie.id } } )
 
-    return <div className = 'mt-16'>
-        <TODO>Añadir lista de comentarios y formulario para añadir nuevo comentario</TODO>
-    </div>
+function Comments({ movie }) {
+
+	const [page, setPage] = useState(0)
+	const { comments, createComment, pagination: { hasNext = false, hasPrevious = false } = { hasNext: false, hasPrevious: false} } = useComments({ filter: { movie: movie.id }, pagination: { page } })
+
+	const [comment, setComment] = useState('')
+	const [rating, setRating] = useState(0)
+
+	const nextPage = evt => { evt?.target?.blur(); setPage(page => page + 1) }
+	const prevPage = evt => { evt?.target?.blur(); setPage(page => page - 1) }
+
+	const handleSubmit = async (e) => {
+		e.preventDefault()
+		let id = movie.id
+		createComment({ id, comment, rating })
+		setComment('')
+		setRating(0)
+	}
+
+	return <>
+		<h2 className = 'mt-16 font-bold text-2xl'>Comentarios</h2>
+		<Separator />
+		<CommentList comments = { comments } variant = 'movie' nextPage = { nextPage } prevPage = { prevPage } hasNext = { hasNext } hasPrevious = { hasPrevious } />
+		<CommentForm setComment = { setComment } setRating = { setRating } handleSubmit = { handleSubmit } />
+	</>
+
 }
+
 function Tagline({ movie }) {
     if(movie.tagline) {
         return <q className={`block text-3xl font-semibold text-black italic w-full px-8 py-4 text-right`}>
@@ -183,7 +207,7 @@ function PlatformLink({ type = '', url = '', ...props }) {
                       rel = 'noreferrer'
                       href = { url }
                       className = {`flex items-center space-x-2 overflow-hidden h-16 w-full bg-white
-                                    transform transition duration-200 
+                                    transform transition duration-200
                                     hover:translate-x-8 hover:scale-105`}>
                 <img src = { Disney } alt = 'Disney+ logo'
                      className = 'rounded-lg w-16 h-16'
@@ -197,7 +221,7 @@ function PlatformLink({ type = '', url = '', ...props }) {
                       rel = 'noreferrer'
                       href = { url }
                       className = {`flex items-center space-x-2 overflow-hidden h-16 w-full bg-white
-                                    transform transition duration-200 
+                                    transform transition duration-200
                                     hover:translate-x-8 hover:scale-105`}>
                 <img src = { Play } alt = 'Google Play logo'
                      className = 'rounded-lg w-16 h-16'
@@ -211,7 +235,7 @@ function PlatformLink({ type = '', url = '', ...props }) {
                       rel = 'noreferrer'
                       href = { url }
                       className = {`flex items-center space-x-2 overflow-hidden h-16 w-full bg-white
-                                    transform transition duration-200 
+                                    transform transition duration-200
                                     hover:translate-x-8 hover:scale-105`}>
                 <img src = { HBO } alt = 'HBO logo'
                      className = 'rounded-lg w-16 h-16'
@@ -225,7 +249,7 @@ function PlatformLink({ type = '', url = '', ...props }) {
                       rel = 'noreferrer'
                       href = { url }
                       className = {`flex items-center space-x-2 overflow-hidden h-16 w-full bg-white
-                                    transform transition duration-200 
+                                    transform transition duration-200
                                     hover:translate-x-8 hover:scale-105`}>
                 <img src = { ITunes } alt = 'iTunes logo'
                      className = 'rounded-lg w-16 h-16'
@@ -239,7 +263,7 @@ function PlatformLink({ type = '', url = '', ...props }) {
                       rel = 'noreferrer'
                       href = { url }
                       className = {`flex items-center space-x-2 overflow-hidden h-16 w-full bg-white
-                                    transform transition duration-200 
+                                    transform transition duration-200
                                     hover:translate-x-8 hover:scale-105`}>
                 <img src = { Netflix } alt = 'Netflix logo'
                      className = 'rounded-lg w-16 h-16'
@@ -253,7 +277,7 @@ function PlatformLink({ type = '', url = '', ...props }) {
                       rel = 'noreferrer'
                       href = { url }
                       className = {`flex items-center space-x-2 overflow-hidden h-16 w-full bg-white
-                                    transform transition duration-200 
+                                    transform transition duration-200
                                     hover:translate-x-8 hover:scale-105`}>
                 <img src = { Prime } alt = 'Prime Video logo'
                      className = 'rounded-lg w-16 h-16'
@@ -267,7 +291,7 @@ function PlatformLink({ type = '', url = '', ...props }) {
                       rel = 'noreferrer'
                       href = { url }
                       className = {`flex items-center space-x-2 overflow-hidden h-16 w-full bg-white
-                                    transform transition duration-200 
+                                    transform transition duration-200
                                     hover:translate-x-8 hover:scale-105`}>
                 <img src = { Youtube } alt = 'YouTube logo'
                      className = 'rounded-lg w-16 h-16'

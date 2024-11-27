@@ -55,11 +55,19 @@ public class MovieService {
 	 * @param crewList criterio de filtrado por equipo de trabajo
 	 * @return resultado de la búsqueda
 	 */
-	public Result<Page<Movie>> get(int page, int size, Sort sort, Example<Movie> filter, List<Cast> castList, List<Crew> crewList) {
+	public Result<Page<Movie>> get(int page, int size, Sort sort, Example<Movie> filter, List<String> genres, List<String> keywords, List<Cast> castList, List<Crew> crewList) {
 
 		Pageable request = PageRequest.of(page, size, sort);
 
 		Criteria criteria = Criteria.byExample(filter);
+
+		if (!genres.isEmpty()) {
+			criteria.and("genres").in(genres);
+		}
+
+		if (!keywords.isEmpty()) {
+			criteria.and("keywords").in(keywords);
+		}
 
 		if (!castList.isEmpty()) {
 

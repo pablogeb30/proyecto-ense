@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import {BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom'
 import ReactFontLoader from 'react-font-loader'
 
-import { SecuredApp, SecuredRoute } from './context'
+import { SecuredApp, SecuredRoute, SecuredAdminRoute } from './context'
 
 import Login from './pages/login'
 import Register from './pages/registry'
@@ -34,9 +34,9 @@ ReactDOM.render(
                     <SecuredRoute exact path = '/movies/new' >
                         <CreateMovie />
                     </SecuredRoute>
-                    <SecuredRoute exact path = '/movies/:id/edit' >
+                    <SecuredAdminRoute exact path = '/movies/:id/edit' >
                         <EditMovie />
-                    </SecuredRoute>
+                    </SecuredAdminRoute>
                     <SecuredRoute exact path = '/movies/:id' >
                         <Movie />
                     </SecuredRoute>

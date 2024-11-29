@@ -83,7 +83,6 @@ public class UserService {
 		}
 
 		result.setPassword(null);
-		result.setRoles(null);
 
 		return new Result<>(result, false, "User data", 0, Result.Code.OK);
 

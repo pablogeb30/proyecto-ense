@@ -6,6 +6,8 @@ import { Shell, Link, Separator, CommentForm, CommentList } from '../../componen
 
 import { useMovie, useComments } from '../../hooks'
 
+import { ADMIN_ROLE } from '../../context/auth'
+
 import { useState } from 'react'
 
 import Disney from './icons/disney_plus.png'
@@ -25,8 +27,10 @@ const backdrop = movie => {
 const poster = movie => movie?.resources?.find(res => res?.type === 'POSTER')?.url
 
 export default function Movie() {
+
     const { id } = useParams()
-    const movie = useMovie(id)
+    const { movie } = useMovie(id)
+	const role = localStorage.getItem('role')
 
     return <Shell>
         <img style = {{ height: '36rem' }}
@@ -42,12 +46,15 @@ export default function Movie() {
             <span>Volver</span>
         </Link>
 
-        <Link variant = 'primary'
-              className = 'rounded-full absolute text-white top-4 right-8 flex items-center px-2 py-2 gap-4'
-              to = {`/movies/${id}/edit`}
-        >
-            <Edit className = 'w-8 h-8'/>
-        </Link>
+		{role === ADMIN_ROLE && (
+			<Link
+				variant="primary"
+				className="rounded-full absolute text-white top-4 right-8 flex items-center px-2 py-2 gap-4"
+				to={`/movies/${id}/edit`}
+			>
+				<Edit className="w-8 h-8" />
+			</Link>
+		)}
 
         <div className = 'mx-auto w-full max-w-screen-2xl p-8'>
             <Header movie = { movie } />
@@ -75,6 +82,7 @@ function Header({ movie }) {
         </hgroup>
     </header>
 }
+
 function Info({ movie }) {
     return <div className = 'grid grid-cols-5 gap-4'>
         <div className = 'col-span-4'>
@@ -95,6 +103,7 @@ function Info({ movie }) {
         </div>
     </div>
 }
+
 function View({ movie }) {
     return <div className = 'flex gap-4 mt-8'>
         <div className = 'w-80 z-10'>
@@ -108,6 +117,7 @@ function View({ movie }) {
         </div>
     </div>
 }
+
 function Cast({ movie }) {
     return <>
         <h2 className = 'mt-16 font-bold text-2xl'>Reparto principal</h2>

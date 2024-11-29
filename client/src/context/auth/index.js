@@ -9,7 +9,9 @@ const AuthenticationContext = React.createContext({
     logout: () => {},
     reset: () => {}
 })
+
 const client = API.instance()
+const ADMIN_ROLE = 'ROLE_ADMIN'
 
 function SecuredApp({children}) {
 
@@ -47,4 +49,13 @@ function SecuredRoute({children, ...props}) {
 
 }
 
-export { AuthenticationContext, SecuredApp, SecuredRoute }
+function SecuredAdminRoute({children, ...props}) {
+
+	const {isAuthenticated} = useContext(AuthenticationContext)
+	const role = localStorage.getItem('role')
+
+	return isAuthenticated && role === ADMIN_ROLE ? <Route {...props}>{children}</Route> : <Redirect to = '/401' />
+
+}
+
+export { AuthenticationContext, SecuredApp, SecuredRoute, SecuredAdminRoute, ADMIN_ROLE }

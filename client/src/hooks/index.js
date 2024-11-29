@@ -18,6 +18,8 @@ export function useMovies(query = {}) {
 }
 
 export function useMovie(id = '') {
+
+	const [status, setStatus] = useState()
 	const [data, setData] = useState({})
 
 	useEffect(() => {
@@ -26,7 +28,24 @@ export function useMovie(id = '') {
 			.then(setData)
 	}, [id])
 
-	return data
+	const update = (id, movie) => API.instance()
+		.updateMovie(id, movie)
+		.then(movie => {
+			if (movie) {
+				setData(movie)
+				setStatus(0)
+			} else {
+				setStatus(-1)
+			}
+		}
+	)
+
+	return {
+		movie: data,
+		status,
+		update
+	}
+
 }
 
 export function useUser(id = null) {

@@ -50,7 +50,10 @@ export default class API {
 			localStorage.setItem('token', token)
 			this.#token = token
 
-			localStorage.setItem('name', await this.findUser(email).name)
+			let user = await this.findUser(email)
+
+			localStorage.setItem('name', user.name)
+			localStorage.setItem('role', user.roles[0])
 
 			return true
 
@@ -313,4 +316,33 @@ export default class API {
 	async updateUser(id, user) {
 		console.log(user)
 	}
+
+	async updateMovie(id, operations) {
+
+		let response = await fetch(`${this.#url}/movies/${id}`, {
+
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': this.#token
+			},
+			body: JSON.stringify(operations)
+
+		})
+
+		if (response.ok) {
+
+			let data = await response.json()
+			let movie = data.data
+
+			return movie
+
+		} else {
+
+			return null
+
+		}
+
+	}
+
 }

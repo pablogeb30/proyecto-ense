@@ -3,7 +3,7 @@ import { ChevronLeftOutline as Left, ChevronRightOutline as Right } from '@grayw
 
 export function CommentList({ comments, variant, nextPage, prevPage, hasNext, hasPrevious }) {
 
-	if (variant == 'user') {
+	if (variant === 'user') {
 		return <CommentListUser comments = { comments }/>
 	} else {
 		return <CommentListMovie comments = { comments } nextPage = { nextPage } prevPage = { prevPage }  hasNext = { hasNext }  hasPrevious = { hasPrevious }/>

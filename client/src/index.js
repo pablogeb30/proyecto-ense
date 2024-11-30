@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import {BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom'
 import ReactFontLoader from 'react-font-loader'
 
-import { SecuredApp, SecuredRoute, SecuredAdminRoute } from './context'
+import { SecuredApp, SecuredRoute, SecuredAdminRoute, SecuredSelfRoute } from './context'
 
 import Login from './pages/login'
 import Register from './pages/registry'
@@ -12,6 +12,7 @@ import Movie from './pages/movie'
 import EditMovie from './pages/edit-movie'
 import CreateMovie from './pages/create-movie'
 import Profile from './pages/profile'
+import EditProfile from './pages/edit-profile'
 import Friends from './pages/friends'
 import NotFound from './pages/not-found'
 
@@ -46,6 +47,9 @@ ReactDOM.render(
                     <SecuredRoute exact path = '/profile'>
                         <Profile />
                     </SecuredRoute>
+                    <SecuredSelfRoute exact path = '/profile/edit' >
+                        <EditProfile />
+                    </SecuredSelfRoute>
                     <SecuredRoute exact path = '/friends'>
                         <Friends />
                     </SecuredRoute>

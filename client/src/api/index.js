@@ -1,5 +1,3 @@
-import DATA from './data'
-
 let __instance = null
 
 export default class API {
@@ -207,7 +205,7 @@ export default class API {
 		}
 	) {
 
-		if (movie == '' && user == '') {
+		if (movie === '' && user === '') {
 			return { content: [], pagination: { hasNext: false, hasPrevious: false } }
 		}
 
@@ -313,8 +311,32 @@ export default class API {
 
 	}
 
-	async updateUser(id, user) {
-		console.log(user)
+	async updateUser(id, operations) {
+
+		let response = await fetch(`${this.#url}/users/${id}`, {
+
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': this.#token
+			},
+			body: JSON.stringify(operations)
+
+		})
+
+		if(response.ok) {
+
+			let data = await response.json()
+			let user = data.data
+
+			return user
+
+		} else {
+
+			return null
+
+		}
+
 	}
 
 	async updateMovie(id, operations) {

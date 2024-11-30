@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { ArrowCircleLeftOutline as Back, PencilAltOutline as Edit } from '@graywolfai/react-heroicons'
 import ReactPlayer from 'react-player'
 
-import { Shell, Link, Separator, CommentForm, CommentList } from '../../components'
+import { Shell, Link, Separator, CommentForm, CommentList, Button } from '../../components'
 
 import { useMovie, useComments } from '../../hooks'
 
@@ -38,7 +38,7 @@ export default function Movie() {
 
 		<Link variant = 'primary'
 			  className = 'rounded-full absolute text-white top-4 left-8 flex items-center pl-2 pr-4 py-2 gap-4'
-			  to = '/'>
+			  to = {`/movies/${id}`}>
 			<Back className = 'w-8 h-8'/>
 			<span>Volver</span>
 		</Link>
@@ -126,9 +126,7 @@ function Info({ movie, update, status }) {
 						rows="6"
 					/>
 
-					<button type="submit" className="self-end bg-gradient-to-br from-green-500 to-blue-600 text-white px-4 py-2 rounded hover:from-green-600 hover:to-blue-700">
-						Guardar
-					</button>
+					<Button className = 'mt-4 self-end ' type = 'submit' variant = 'secondary'>Guardar</Button>
 
 				</form>
 

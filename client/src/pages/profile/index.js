@@ -1,7 +1,8 @@
-import { Shell, Separator, Button } from '../../components'
+import { Shell, Separator, Link } from '../../components'
 import { CommentList } from '../../components/comment/CommentList'
 import { useUser, useComments } from '../../hooks'
 import { CakeOutline as Cake, AtSymbolOutline as Email, FlagOutline as Flag } from '@graywolfai/react-heroicons'
+import { PencilAltOutline as Edit } from '@graywolfai/react-heroicons'
 
 export default function Profile() {
 
@@ -17,11 +18,20 @@ export default function Profile() {
 function ProfileContent({ user }) {
 
 	return <>
+
 		<div className = 'mx-auto w-full max-w-screen-2xl p-8'>
+
 			<Background image = { user.picture } />
+
+			<Link variant="primary" className="rounded-full absolute text-white top-4 right-8 flex items-center px-2 py-2 gap-4" to={`/profile/edit`} >
+				<Edit className="w-8 h-8" />
+			</Link>
+
 			<Header user = { user } />
 			<Comments user = { user } />
+
 		</div>
+
 	</>
 
 }
@@ -29,8 +39,7 @@ function ProfileContent({ user }) {
 function Background({ image }) {
 
 	return <>
-		<img style = {{ height: '36rem' }} src = { image } alt = { `${ image } backdrop` } className = 'absolute top-2 left-0 right-0 w-full object-cover filter blur transform scale-105'
-		/>
+		<img style = {{ height: '36rem' }} src = { image } alt = { `${ image } backdrop` } className = 'absolute top-2 left-0 right-0 w-full object-cover filter blur transform scale-105' />
 	</>
 
 }

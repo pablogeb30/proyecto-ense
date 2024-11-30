@@ -52,6 +52,7 @@ export function useUser(id = null) {
 
 	const [data, setData] = useState([])
 	const userId = id === null ? localStorage.getItem('user') : id
+	const [status, setStatus] = useState()
 
 	useEffect(() => {
 
@@ -69,12 +70,20 @@ export function useUser(id = null) {
 			.createUser(user)
 			.then(user => setData(user))
 
-	const update = user => API.instance()
-			.updateUser(id, user)
-			.then(user => setData(user))
+	const update = (operations) => API.instance()
+			.updateUser(userId, operations)
+			.then(user => {
+				if (user) {
+					setData(user)
+					setStatus(0)
+				} else {
+					setStatus(-1)
+				}
+			})
 
 	return {
 		user: data,
+		status,
 		create,
 		update
 	}

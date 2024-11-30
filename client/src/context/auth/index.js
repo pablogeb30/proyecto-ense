@@ -58,4 +58,12 @@ function SecuredAdminRoute({children, ...props}) {
 
 }
 
-export { AuthenticationContext, SecuredApp, SecuredRoute, SecuredAdminRoute, ADMIN_ROLE }
+function SecuredSelfRoute({children, ...props}) {
+
+	const {isAuthenticated} = useContext(AuthenticationContext)
+
+	return isAuthenticated ? <Route {...props}>{children}</Route> : <Redirect to = '/401' />
+
+}
+
+export { AuthenticationContext, SecuredApp, SecuredRoute, SecuredAdminRoute, SecuredSelfRoute, ADMIN_ROLE }

@@ -81,11 +81,21 @@ export function useUser(id = null) {
 				}
 			})
 
+	const updateFriend = (friendId, operations) => API.instance()
+		.updateFriend(userId, friendId, operations)
+		.then(user => setData(user))
+
+	const deleteFriend = (friendId) => API.instance()
+		.deleteFriend(userId, friendId)
+		.then(user => setData(user))
+
 	return {
 		user: data,
 		status,
 		create,
-		update
+		update,
+		updateFriend,
+		deleteFriend
 	}
 
 }

@@ -150,7 +150,7 @@ public class UserService {
 
 			User filteredUser = patchUtil.patch(originalUser, operations);
 
-			List<User> friendsCopy = filteredUser.getFriends();
+			List<FriendRelation> friendsCopy = filteredUser.getFriends();
 			List<String> rolesCopy = filteredUser.getRoles();
 
 			filteredUser.setFriends(null);
@@ -192,17 +192,18 @@ public class UserService {
 
 				if (updatedUser.getFriends() != null) {
 
-					User parseUser = new User().setEmail(updatedUser.getEmail()).setName(updatedUser.getName());
+					for (FriendRelation friend : updatedUser.getFriends()) {
 
-					for (User friend : updatedUser.getFriends()) {
-
-						Optional<User> resultFriend = users.findById(friend.getEmail());
+						Optional<User> resultFriend = users.findById(friend.getFriendEmail());
 						User friendUser = resultFriend.get();
 
-						List<User> friends = friendUser.getFriends();
+						List<FriendRelation> friends = friendUser.getFriends();
 
-						friends.removeIf(f -> f.getEmail().equals(updatedUser.getEmail()));
-						friends.add(parseUser);
+						friends.removeIf(f -> f.getFriendEmail().equals(updatedUser.getEmail()));
+
+						FriendRelation newFriendRelation = new FriendRelation(updatedUser.getEmail(), updatedUser.getName(), friend.getStatus(), friend.getRequested(), friend.getAccepted());
+
+						friends.add(newFriendRelation);
 
 						friendUser.setFriends(friends);
 
@@ -249,8 +250,8 @@ public class UserService {
 		assessments.deleteAll(assessments.findAll(filter));
 
 		if (user.getFriends() != null) {
-			for (User friend : user.getFriends()) {
-				deleteFriend(user.getEmail(), friend.getEmail(), true);
+			for (FriendRelation friend : user.getFriends()) {
+				deleteFriend(user.getEmail(), friend.getFriendEmail(), true);
 			}
 		}
 
@@ -268,7 +269,7 @@ public class UserService {
 	 * @param redo   booleano que indica si la inserción se realiza en ambas direcciones
 	 * @return resultado de la inserción
 	 */
-	public Result<User> createFriend(String email, User friend, boolean redo) {
+	public Result<User> createFriend(String email, FriendRelation friend, boolean redo) {
 
 		User user = users.findById(email).orElse(null);
 
@@ -276,9 +277,9 @@ public class UserService {
 			return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
 		}
 
-		User bdFriend = users.findById(friend.getEmail()).orElse(null);
+		User bdFriend = users.findById(friend.getFriendEmail()).orElse(null);
 
-		if (bdFriend == null || !bdFriend.getName().equals(friend.getName())) {
+		if (bdFriend == null || !bdFriend.getName().equals(friend.getFriendName())) {
 			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
 		}
 
@@ -286,28 +287,120 @@ public class UserService {
 			return new Result<>(null, false, "Recursive adition", 0, Result.Code.BAD_REQUEST);
 		}
 
-		List<User> friends = user.getFriends();
+		List<FriendRelation> friends = user.getFriends();
 
 		if (friends == null) {
 			friends = new ArrayList<>();
 		}
 
-		if (friends.stream().anyMatch(f -> f.getEmail().equals(bdFriend.getEmail()))) {
+		if (friends.stream().anyMatch(f -> f.getFriendEmail().equals(bdFriend.getEmail()))) {
 			return new Result<>(null, false, "Friend already added", 0, Result.Code.BAD_REQUEST);
 		}
 
-		friends.add(friend);
+		LocalDate now = LocalDate.now();
+		Date createdDate = new Date(now.getDayOfMonth(), now.getMonthValue(), now.getYear());
+
+		FriendRelation newFriendRelation = new FriendRelation(friend.getFriendEmail(), friend.getFriendName(), FriendStatus.PENDING, createdDate, null);
+
+		friends.add(newFriendRelation);
 
 		user.setFriends(friends);
 
 		users.save(user);
 
 		if (redo) {
-			User parseUser = new User().setEmail(user.getEmail()).setName(user.getName());
-			createFriend(bdFriend.getEmail(), parseUser, false);
+
+			FriendRelation reversedFriendRelation = new FriendRelation(email, user.getName(), FriendStatus.PENDING, createdDate, null);
+
+			createFriend(bdFriend.getEmail(), reversedFriendRelation, false);
+
 		}
 
 		return new Result<>(user, false, "Friend added", 0, Result.Code.CREATED);
+
+	}
+
+	/**
+	 * Metodo que modifica el estado de un amigo en la lista de amigos de un usuario
+	 *
+	 * @param email       correo electrónico del usuario actual
+	 * @param friendEmail correo electrónico del amigo cuyo estado se modifica
+	 * @param operations  lista de operaciones de modificación
+	 * @param redo        booleano que indica si la modificación se realiza en ambas direcciones
+	 * @return resultado de la modificación
+	 */
+
+	public Result<User> updateFriend(String email, String friendEmail, List<Map<String, Object>> operations, boolean redo) {
+
+		try {
+
+			User user = users.findById(email).orElse(null);
+
+			if (user == null) {
+				return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
+			}
+
+			List<FriendRelation> friends = user.getFriends();
+
+			if (friends == null) {
+				return new Result<>(null, false, "No friends", 0, Result.Code.NOT_FOUND);
+			}
+
+			User friend = users.findById(friendEmail).orElse(null);
+
+			if (friend == null) {
+				return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
+			}
+
+			FriendRelation friendRelation = friends.stream().filter(f -> f.getFriendEmail().equals(friendEmail)).findFirst().orElse(null);
+
+			if (friendRelation == null) {
+				return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
+			}
+
+			operations.removeIf(op -> op.containsKey("path") && (op.get("path").equals("/friend")));
+
+			FriendRelation filteredFriend = patchUtil.patch(friendRelation, operations);
+
+			Set<ConstraintViolation<FriendRelation>> violations = validator.validate(filteredFriend, OnUpdate.class);
+
+			if (!violations.isEmpty()) {
+				return new Result<>(null, true, "Not valid due to violations", 0, Result.Code.BAD_REQUEST);
+			}
+
+			if (filteredFriend.getStatus().equals(FriendStatus.DECLINED)) {
+
+				deleteFriend(email, friendEmail, true);
+
+				friends.removeIf(f -> f.getFriendEmail().equals(friendEmail));
+				user.setFriends(friends);
+
+			} else {
+
+				LocalDate now = LocalDate.now();
+				Date acceptedDate = new Date(now.getDayOfMonth(), now.getMonthValue(), now.getYear());
+				filteredFriend.setAccepted(acceptedDate);
+
+				friends.removeIf(f -> f.getFriendEmail().equals(friendEmail));
+				friends.add(filteredFriend);
+
+				user.setFriends(friends);
+
+				users.save(user);
+
+				if (redo) {
+					updateFriend(friendEmail, email, operations, false);
+				}
+
+			}
+
+			return new Result<>(user, false, "Friend updated", 0, Result.Code.OK);
+
+		} catch (Exception e) {
+
+			return new Result<>(null, true, e.getLocalizedMessage(), 0, Result.Code.BAD_REQUEST);
+
+		}
 
 	}
 
@@ -327,7 +420,7 @@ public class UserService {
 			return new Result<>(null, false, "No user", 0, Result.Code.NOT_FOUND);
 		}
 
-		List<User> friends = user.getFriends();
+		List<FriendRelation> friends = user.getFriends();
 
 		if (friends == null) {
 			return new Result<>(null, false, "No friends", 0, Result.Code.NOT_FOUND);
@@ -339,11 +432,11 @@ public class UserService {
 			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
 		}
 
-		if (friends.stream().noneMatch(f -> f.getEmail().equals(friendEmail))) {
+		if (friends.stream().noneMatch(f -> f.getFriendEmail().equals(friendEmail))) {
 			return new Result<>(null, false, "No friend", 0, Result.Code.NOT_FOUND);
 		}
 
-		friends.removeIf(f -> f.getEmail().equals(friendEmail));
+		friends.removeIf(f -> f.getFriendEmail().equals(friendEmail));
 
 		user.setFriends(friends);
 
@@ -373,13 +466,13 @@ public class UserService {
 			return false;
 		}
 
-		List<User> friends = user.getFriends();
+		List<FriendRelation> friends = user.getFriends();
 
 		if (friends == null) {
 			return false;
 		}
 
-		return friends.stream().anyMatch(f -> f.getEmail().equals(requestEmail));
+		return friends.stream().anyMatch(f -> f.getFriendEmail().equals(requestEmail));
 
 	}
 

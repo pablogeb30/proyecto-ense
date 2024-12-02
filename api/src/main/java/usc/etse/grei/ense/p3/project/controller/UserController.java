@@ -419,9 +419,61 @@ public class UserController {
 					content = @Content
 			)
 	})
-	ResponseEntity<Object> createFriend(@PathVariable("email") @NotBlank @Email String email, @Validated(OnRelation.class) @RequestBody User friend) {
+	ResponseEntity<Object> createFriend(@PathVariable("email") @NotBlank @Email String email, @Validated(OnCreate.class) @RequestBody FriendRelation friend) {
 
 		Result<User> result = users.createFriend(email, friend, true);
+		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
+
+	}
+
+	/**
+	 * Metodo que gestiona la operación PATCH /users/{email}/friends/{friendEmail}
+	 *
+	 * @param email       correo electrónico del usuario
+	 * @param friendEmail correo electrónico del usuario amigo
+	 * @param updates     lista de operaciones de modificación
+	 * @return respuesta HTTP
+	 */
+	@PatchMapping(path = "{email}/friends/{friendEmail}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("#email == principal")
+	@Operation(
+			operationId = "updateFriend",
+			summary = "Update friend",
+			description = "Update a friend for a user"
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "The friend has been updated",
+					content = @Content(
+							mediaType = "application/json",
+							schema = @Schema(implementation = User.class)
+					)
+			),
+			@ApiResponse(
+					responseCode = "400",
+					description = "Bad request",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "Bad token",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "Not enough privileges",
+					content = @Content
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "User not found",
+					content = @Content
+			)
+	})
+	ResponseEntity<Object> updateFriend(@PathVariable("email") @NotBlank @Email String email, @PathVariable("friendEmail") @NotBlank @Email String friendEmail, @RequestBody List<Map<String, Object>> updates) {
+
+		Result<User> result = users.updateFriend(email, friendEmail, updates, true);
 		return ResponseHandler.generateResponse(result.isError(), result.getMessaje(), result.getInternalCode(), result.getResult(), new ArrayList<>(), result.getStatus());
 
 	}

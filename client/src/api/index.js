@@ -367,4 +367,58 @@ export default class API {
 
 	}
 
+	async updateFriend(id, friendId, operations) {
+
+		let response = await fetch(`${this.#url}/users/${id}/friends/${friendId}`, {
+
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': this.#token
+			},
+			body: JSON.stringify(operations)
+
+		})
+
+		if(response.ok) {
+
+			let data = await response.json()
+			let user = data.data
+
+			return user
+
+		} else {
+
+			return null
+
+		}
+
+	}
+
+	async deleteFriend(id, friendId) {
+
+		let response = await fetch(`${this.#url}/users/${id}/friends/${friendId}`, {
+
+			method: 'DELETE',
+			headers: {
+				'Authorization': this.#token
+			}
+
+		})
+
+		if(response.ok) {
+
+			let data = await response.json()
+			let user = data.data
+
+			return user
+
+		} else {
+
+			return null
+
+		}
+
+	}
+
 }

@@ -258,6 +258,10 @@ export default class API {
 
 	}
 
+	async findPerson(id) {
+
+	}
+
 	async createComment(comment) {
 
 		let body = {

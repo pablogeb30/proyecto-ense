@@ -55,15 +55,9 @@ export function useUser(id = null) {
 	const [status, setStatus] = useState()
 
 	useEffect(() => {
-
-		if (userId === null) {
-			return
-		}
-
 		API.instance().findUser(userId).then(user => {
 			setData(user)
 		})
-
 	}, [userId])
 
 	const create = user => API.instance()
@@ -106,11 +100,6 @@ export function useComments(query = {}){
 	const queryString = JSON.stringify(query)
 
 	useEffect(() => {
-
-		if (Object.keys(query).length === 0) {
-			return
-		}
-
 		API.instance()
 			.findComments(JSON.parse(queryString))
 			.then(setData)

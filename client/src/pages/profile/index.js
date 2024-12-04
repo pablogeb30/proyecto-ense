@@ -39,7 +39,7 @@ function ProfileContent({ user }) {
 function Background({ image }) {
 
 	return <>
-		<img style = {{ height: '36rem' }} src = { image } alt = { `${ image } backdrop` } className = 'absolute top-2 left-0 right-0 w-full object-cover filter blur transform scale-105' />
+		<img style = {{ height: '36rem' }} src = { image } alt = { `${ image }` } className = 'absolute top-2 left-0 right-0 w-full object-cover filter blur transform scale-105' />
 	</>
 
 }
@@ -47,7 +47,7 @@ function Background({ image }) {
 function Header({ user }) {
 
 	return <header className = 'mt-64 relative flex items-end pb-8 mb-8'>
-		<img style = {{ aspectRatio: '2/3' }} src = { user.picture } alt = { `${ user.email } profile image` } className = 'w-64 rounded-lg shadow-xl z-20' />
+		<img style = {{ aspectRatio: '2/3' }} src = { user.picture } alt = { `${ user.email }` } className = 'w-64 rounded-lg shadow-xl z-20' />
 		<hgroup className = 'flex-1'>
 			<h1 className = {`bg-black bg-opacity-50 backdrop-filter backdrop-blur text-right text-white text-6xl font-bold p-8`}>
 				{ user.name }

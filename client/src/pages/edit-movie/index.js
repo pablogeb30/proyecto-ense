@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { ArrowCircleLeftOutline as Back, PencilAltOutline as Edit } from '@graywolfai/react-heroicons'
+import { ArrowCircleLeftOutline as Back } from '@graywolfai/react-heroicons'
 import ReactPlayer from 'react-player'
 
 import { Shell, Link, Separator, CommentForm, CommentList, Button } from '../../components'
@@ -59,7 +59,7 @@ function Header({ movie }) {
 	return <header className = 'mt-64 relative flex items-end pb-8 mb-8'>
 		<img style = {{ aspectRatio: '2/3' }}
 			 src = { poster(movie) }
-			 alt = { `${ movie.title } poster` }
+			 alt = { `${ movie.title }` }
 			 className = 'w-64 rounded-lg shadow-xl z-20' />
 		<hgroup className = 'flex-1'>
 			<h1 className = {`bg-black bg-opacity-50 backdrop-filter backdrop-blur
@@ -83,11 +83,14 @@ function Info({ movie, update, status }) {
 	}, [movie]);
 
 	useEffect(() => {
+
 		if (status === 0) {
 			alert('La película se ha actualizado correctamente')
+			window.history.back()
 		} else if (status === -1) {
 			alert('Ha ocurrido un error al actualizar la película')
 		}
+
 	}, [status]);
 
 	const handleInputChange = (event) => {
@@ -95,6 +98,7 @@ function Info({ movie, update, status }) {
 	};
 
 	const handleSubmit = (e) => {
+
 		e.preventDefault();
 
 		update(movie.id, [{

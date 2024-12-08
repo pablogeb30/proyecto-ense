@@ -54,6 +54,8 @@ export function MovieList({
 }
 
 function Poster({className = '', movie}) {
+    const poster = movie?.resources?.find(res => res.type === 'POSTER')?.url;
+
     return <li className = {`w-full transition transform cursor-pointer rounded-md bg-white overflow-hidden relative shadow
                              hover:scale-125 hover:shadow-md hover:z-20
                              ${className}`}
@@ -61,7 +63,7 @@ function Poster({className = '', movie}) {
     >
         <Link to = { `/movies/${movie.id}` }>
             <img className = 'w-full h-full object-cover'
-                 src = { movie.resources.find(res => res.type === 'POSTER').url }
+                 src = { poster }
                  alt = { `${movie.title } poster` } />
         </Link>
     </li>

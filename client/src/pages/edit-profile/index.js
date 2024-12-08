@@ -5,6 +5,8 @@ import { useComments, useUser } from '../../hooks'
 
 import { useEffect, useState } from 'react'
 
+import DefaultUserImage from '../profile/images/default_user.png'
+
 export default function EditProfile() {
 
 	const email = localStorage.getItem('user')
@@ -111,7 +113,7 @@ function Header({ user }) {
 	}
 
 	return <header className = 'mt-64 relative flex items-end pb-8 mb-8'>
-		<img style = {{ aspectRatio: '2/3' }} src = { user.picture } alt = { `${ user.email }` } className = 'w-64 rounded-lg shadow-xl z-20' />
+		<img style = {{ aspectRatio: '2/3', objectFit: 'cover' }} src = { user.picture || DefaultUserImage } alt = { `${ user.email }` } className = 'w-64 rounded-lg shadow-xl z-20' />
 		<hgroup className = 'flex-1'>
 			<div className='flex justify-end'>
 				<Input

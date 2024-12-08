@@ -15,6 +15,8 @@ import { AuthenticationContext } from '../../context'
 import { Logo, Button, Input, MovieList } from '../'
 import { useUser } from '../../hooks'
 
+import DefaultUserLogo from '../../pages/profile/images/icon_user.svg'
+
 function tryParse(query) {
     try{
         if(query?.startsWith('?') && query?.length > 1) {
@@ -122,7 +124,7 @@ export function Shell({children, className = ''}) {
 
 function AppMenu() {
     const { logout } = useContext(AuthenticationContext)
-    const { user: { name = '', email = '', picture = '' } } = useUser()
+    const { user: { name = '', email = '', picture = DefaultUserLogo } } = useUser()
 
     return <Menu>
         { ({open}) => <>

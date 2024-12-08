@@ -4,6 +4,8 @@ import { useUser, useComments } from '../../hooks'
 import { CakeOutline as Cake, AtSymbolOutline as Email, FlagOutline as Flag } from '@graywolfai/react-heroicons'
 import { PencilAltOutline as Edit } from '@graywolfai/react-heroicons'
 
+import DefaultUserImage from './images/default_user.png'
+
 export default function Profile() {
 
 	const email = localStorage.getItem('user')
@@ -47,7 +49,7 @@ function Background({ image }) {
 function Header({ user }) {
 
 	return <header className = 'mt-64 relative flex items-end pb-8 mb-8'>
-		<img style = {{ aspectRatio: '2/3' }} src = { user.picture } alt = { `${ user.email }` } className = 'w-64 rounded-lg shadow-xl z-20' />
+		<img style = {{ aspectRatio: '2/3', objectFit: 'cover' }} src = { user.picture || DefaultUserImage } alt = { `${ user.email }` } className = 'w-64 rounded-lg shadow-xl z-20' />
 		<hgroup className = 'flex-1'>
 			<h1 className = {`bg-black bg-opacity-50 backdrop-filter backdrop-blur text-right text-white text-6xl font-bold p-8`}>
 				{ user.name }

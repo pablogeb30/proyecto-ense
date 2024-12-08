@@ -17,14 +17,15 @@ import ITunes from './icons/itunes.png'
 import Netflix from './icons/netflix.png'
 import Prime from './icons/prime_video.png'
 import Youtube from './icons/youtube.png'
+import DefaultPoster from './images/poster.jpg'
 
 const backdrop = movie => {
     const backdrop = movie?.resources?.find(res => res?.type === 'BACKDROP')?.url
-    const poster = movie?.resources?.find(res => res?.type === 'POSTER')?.url
+    const poster = movie?.resources?.find(res => res.type === 'POSTER')?.url ?? DefaultPoster
 
     return backdrop ? backdrop : poster
 }
-const poster = movie => movie?.resources?.find(res => res?.type === 'POSTER')?.url
+const poster = movie => movie?.resources?.find(res => res.type === 'POSTER')?.url ?? DefaultPoster
 
 export default function Movie() {
 

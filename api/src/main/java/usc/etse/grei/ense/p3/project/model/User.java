@@ -91,7 +91,7 @@ public class User {
 			format = "array",
 			type = "array"
 	)
-	private List<@Valid User> friends;
+	private List<@Valid FriendRelation> friends;
 
 	@NotBlank(message = "The password field can not be empty", groups = {OnCreate.class, OnUpdate.class})
 	@Null(message = "The password field is not allowed", groups = OnRelation.class)
@@ -118,7 +118,7 @@ public class User {
 	public User() {
 	}
 
-	public User(String email, String name, String country, String picture, Date birthday, List<User> friends) {
+	public User(String email, String name, String country, String picture, Date birthday, List<FriendRelation> friends) {
 		this.email = email;
 		this.name = name;
 		this.country = country;
@@ -172,11 +172,11 @@ public class User {
 		return this;
 	}
 
-	public List<User> getFriends() {
+	public List<FriendRelation> getFriends() {
 		return friends;
 	}
 
-	public User setFriends(List<User> friends) {
+	public User setFriends(List<FriendRelation> friends) {
 		this.friends = friends;
 		return this;
 	}

@@ -106,6 +106,8 @@ public class MovieController {
 			@RequestParam(name = "keywords", required = false, defaultValue = "") List<String> keywords,
 			@RequestParam(name = "genres", required = false, defaultValue = "") List<String> genres,
 			@RequestParam(name = "releaseDate", required = false, defaultValue = "") String releaseDate,
+			@RequestParam(name = "title", required = false, defaultValue = "") String title,
+			@RequestParam(name = "status", required = false, defaultValue = "") String status,
 			@RequestParam(name = "cast", required = false, defaultValue = "") List<String> cast,
 			@RequestParam(name = "crew", required = false, defaultValue = "") List<String> crew
 	) {
@@ -118,14 +120,6 @@ public class MovieController {
 				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
 		Movie filterMovie = new Movie();
-
-		if (!genres.isEmpty()) {
-			filterMovie.setGenres(genres);
-		}
-
-		if (!keywords.isEmpty()) {
-			filterMovie.setKeywords(keywords);
-		}
 
 		Date parsedDate;
 
@@ -211,12 +205,20 @@ public class MovieController {
 
 		}
 
+		if (!title.isBlank()) {
+			filterMovie.setTitle(title);
+		}
+
+		if (!status.isBlank()) {
+			filterMovie.setStatus(Status.valueOf(status.toUpperCase()));
+		}
+
 		Example<Movie> filter = Example.of(
 				filterMovie,
 				matcher
 		);
 
-		Result<Page<Movie>> result = movies.get(page, size, Sort.by(criteria), filter, castList, crewList);
+		Result<Page<Movie>> result = movies.get(page, size, Sort.by(criteria), filter, genres, keywords, castList, crewList);
 		ArrayList<Link> links = new ArrayList<>();
 
 		if (result.getResult() != null) {
@@ -224,11 +226,11 @@ public class MovieController {
 			Page<Movie> movies = result.getResult();
 			Pageable metadata = movies.getPageable();
 
-			Link self = linkTo(methodOn(MovieController.class).getMovies(page, size, sort, keywords, genres, releaseDate, cast, crew)).withSelfRel();
-			Link first = linkTo(methodOn(MovieController.class).getMovies(metadata.first().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.FIRST);
-			Link next = linkTo(methodOn(MovieController.class).getMovies(metadata.next().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.NEXT);
-			Link previous = linkTo(methodOn(MovieController.class).getMovies(metadata.previousOrFirst().getPageNumber(), size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.PREVIOUS);
-			Link last = linkTo(methodOn(MovieController.class).getMovies(movies.getTotalPages() - 1, size, sort, keywords, genres, releaseDate, cast, crew)).withRel(IanaLinkRelations.LAST);
+			Link self = linkTo(methodOn(MovieController.class).getMovies(page, size, sort, keywords, genres, releaseDate, title, status, cast, crew)).withSelfRel();
+			Link first = linkTo(methodOn(MovieController.class).getMovies(metadata.first().getPageNumber(), size, sort, keywords, genres, releaseDate, title, status, cast, crew)).withRel(IanaLinkRelations.FIRST);
+			Link next = linkTo(methodOn(MovieController.class).getMovies(metadata.next().getPageNumber(), size, sort, keywords, genres, releaseDate, title, status, cast, crew)).withRel(IanaLinkRelations.NEXT);
+			Link previous = linkTo(methodOn(MovieController.class).getMovies(metadata.previousOrFirst().getPageNumber(), size, sort, keywords, genres, releaseDate, title, status, cast, crew)).withRel(IanaLinkRelations.PREVIOUS);
+			Link last = linkTo(methodOn(MovieController.class).getMovies(movies.getTotalPages() - 1, size, sort, keywords, genres, releaseDate, title, status, cast, crew)).withRel(IanaLinkRelations.LAST);
 			Link resource = linkTo(methodOn(MovieController.class).getMovie(null)).withRel(relationProvider.getItemResourceRelFor(Movie.class));
 
 			links.add(self);
@@ -945,12 +947,14 @@ public class MovieController {
 			Pageable metadata = assesments.getPageable();
 
 			Link movie = linkTo(methodOn(MovieController.class).getMovie(movieId)).withRel("movie");
+			Link self = linkTo(methodOn(MovieController.class).getAssessments(movieId, page, size, sort)).withSelfRel();
 			Link first = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.first().getPageNumber(), size, sort)).withRel(IanaLinkRelations.FIRST);
 			Link last = linkTo(methodOn(MovieController.class).getAssessments(movieId, assesments.getTotalPages() - 1, size, sort)).withRel(IanaLinkRelations.LAST);
 			Link next = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.next().getPageNumber(), size, sort)).withRel(IanaLinkRelations.NEXT);
 			Link previous = linkTo(methodOn(MovieController.class).getAssessments(movieId, metadata.previousOrFirst().getPageNumber(), size, sort)).withRel(IanaLinkRelations.PREVIOUS);
 
 			links.add(movie);
+			links.add(self);
 			links.add(first);
 			links.add(last);
 			links.add(next);

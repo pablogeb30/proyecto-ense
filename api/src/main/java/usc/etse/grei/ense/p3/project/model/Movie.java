@@ -47,7 +47,7 @@ public class Movie {
 	)
 	private String title;
 
-	@Size(min = 2, max = 256, groups = {OnCreate.class, OnUpdate.class})
+	@Size(min = 2, max = 1500, groups = {OnCreate.class, OnUpdate.class})
 	@Null(groups = OnRelation.class)
 	@Schema(
 			requiredMode = Schema.RequiredMode.AUTO,
